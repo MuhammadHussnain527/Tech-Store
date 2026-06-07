@@ -14,20 +14,8 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebFilter({
-        "/cart",
-        "/cart/*",
-
-        "/orders",
-        "/orders/*",
-
-        "/profile",
-        "/profile/*",
-
-        "/admin",
-        "/admin/*"
-})
-public class AuthFilter implements Filter {
+@WebFilter("/admin/*")
+public class AdminFilter implements Filter {
 
     @Override
     public void doFilter(
@@ -42,11 +30,18 @@ public class AuthFilter implements Filter {
 
         HttpSession session = httpRequest.getSession(false);
 
-        boolean authenticated = session != null && session.getAttribute("userId") != null;
-
-        if (!authenticated) {
+        if (session == null || session.getAttribute("userId") == null) {
 
             JsonResponse.sendError(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+
+            return;
+        }
+
+        Object role = session.getAttribute("userRole");
+
+        if (!"ADMIN".equals(role)) {
+
+            JsonResponse.sendError(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Admin access required");
 
             return;
         }

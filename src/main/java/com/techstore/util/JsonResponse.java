@@ -12,8 +12,7 @@ public final class JsonResponse {
     private static final Gson GSON = new Gson();
 
     private JsonResponse() {
-        throw new UnsupportedOperationException(
-                "Utility class cannot be instantiated.");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated.");
     }
 
     public static void sendSuccess(
@@ -32,8 +31,8 @@ public final class JsonResponse {
         result.put("message", message);
         result.put("data", data);
 
-        response.getWriter().write(
-                GSON.toJson(result));
+        response.getWriter().write(GSON.toJson(result));
+        response.getWriter().flush();
     }
 
     public static void sendError(
@@ -50,7 +49,7 @@ public final class JsonResponse {
         result.put("success", false);
         result.put("message", message);
 
-        response.getWriter().write(
-                GSON.toJson(result));
+        response.getWriter().write(GSON.toJson(result));
+        response.getWriter().flush();
     }
 }

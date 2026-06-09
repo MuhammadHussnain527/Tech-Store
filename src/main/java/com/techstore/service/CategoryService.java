@@ -2,6 +2,7 @@ package com.techstore.service;
 
 import com.techstore.dao.CategoryDAO;
 import com.techstore.model.Category;
+import com.techstore.util.ValidationUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -39,7 +40,7 @@ public class CategoryService {
 
     public Category getCategoryBySlug(String slug) throws ServiceException {
         try {
-            slug = sanitize(slug);
+            slug = ValidationUtil.sanitizeInput(slug);
             if (slug == null || slug.isBlank()) {
                 throw new ServiceException("Invalid category slug");
             }
@@ -113,15 +114,8 @@ public class CategoryService {
         if (category.getSlug() == null || category.getSlug().isBlank()) {
             throw new ServiceException("Category slug is required");
         }
-        category.setName(sanitize(category.getName()));
-        category.setDescription(sanitize(category.getDescription()));
-        category.setSlug(sanitize(category.getSlug()).toLowerCase());
-    }
-
-    private String sanitize(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.replaceAll("<[^>]*>", "").trim();
+        category.setName(ValidationUtil.sanitizeInput(category.getName()));
+        category.setDescription(ValidationUtil.sanitizeInput(category.getDescription()));
+        category.setSlug(ValidationUtil.sanitizeInput(category.getSlug()).toLowerCase());
     }
 }

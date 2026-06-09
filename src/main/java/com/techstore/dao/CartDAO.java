@@ -14,17 +14,25 @@ import java.util.List;
 
 public class CartDAO {
 
-    private static final String GET_CART_ITEMS_SQL = "SELECT * FROM cart_items WHERE user_id = ? ORDER BY added_at DESC";
+    private static final String GET_CART_ITEMS_SQL = "SELECT * FROM cart_items " +
+            "WHERE user_id = ? " +
+            "ORDER BY added_at DESC";
 
-    private static final String GET_CART_ITEM_SQL = "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?";
+    private static final String GET_CART_ITEM_SQL = "SELECT * FROM cart_items " +
+            "WHERE user_id = ? AND product_id = ?";
 
-    private static final String ADD_TO_CART_SQL = "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
+    private static final String ADD_TO_CART_SQL = "INSERT INTO cart_items (user_id, product_id, quantity) " +
+            "VALUES (?, ?, ?)";
 
-    private static final String UPDATE_QUANTITY_SQL = "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
+    private static final String UPDATE_QUANTITY_SQL = "UPDATE cart_items " +
+            "SET quantity = ? " +
+            "WHERE user_id = ? AND product_id = ?";
 
-    private static final String REMOVE_ITEM_SQL = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
+    private static final String REMOVE_ITEM_SQL = "DELETE FROM cart_items " +
+            "WHERE user_id = ? AND product_id = ?";
 
-    private static final String CLEAR_CART_SQL = "DELETE FROM cart_items WHERE user_id = ?";
+    private static final String CLEAR_CART_SQL = "DELETE FROM cart_items " +
+            "WHERE user_id = ?";
 
     public List<CartItem> getCartItems(int userId)
             throws SQLException {
@@ -50,7 +58,8 @@ public class CartDAO {
 
     public CartItem getCartItem(
             int userId,
-            int productId) throws SQLException {
+            int productId)
+            throws SQLException {
 
         try (
                 Connection connection = DBConnection.getConnection();
@@ -73,7 +82,8 @@ public class CartDAO {
     public boolean addToCart(
             int userId,
             int productId,
-            int quantity) throws SQLException {
+            int quantity)
+            throws SQLException {
 
         try (
                 Connection connection = DBConnection.getConnection();
@@ -90,7 +100,8 @@ public class CartDAO {
     public boolean updateQuantity(
             int userId,
             int productId,
-            int quantity) throws SQLException {
+            int quantity)
+            throws SQLException {
 
         try (
                 Connection connection = DBConnection.getConnection();
@@ -106,7 +117,8 @@ public class CartDAO {
 
     public boolean removeItem(
             int userId,
-            int productId) throws SQLException {
+            int productId)
+            throws SQLException {
 
         try (
                 Connection connection = DBConnection.getConnection();
@@ -119,16 +131,30 @@ public class CartDAO {
         }
     }
 
-    public boolean clearCart(int userId)
+    // ----------------------------------------------------------------
+    // Transactional overload — used inside OrderService transaction
+    // ----------------------------------------------------------------
+
+    public void clearCart(Connection connection, int userId)
             throws SQLException {
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(CLEAR_CART_SQL)) {
+        try (PreparedStatement statement = connection.prepareStatement(CLEAR_CART_SQL)) {
 
             statement.setInt(1, userId);
 
-            return statement.executeUpdate() > 0;
+            statement.executeUpdate();
+        }
+    }
+
+    // Standalone version
+    public boolean clearCart(int userId)
+            throws SQLException {
+
+        try (Connection connection = DBConnection.getConnection()) {
+
+            clearCart(connection, userId);
+
+            return true;
         }
     }
 
@@ -152,6 +178,7 @@ public class CartDAO {
         Timestamp addedAt = resultSet.getTimestamp("added_at");
 
         if (addedAt != null) {
+
             item.setAddedAt(
                     addedAt.toLocalDateTime());
         }

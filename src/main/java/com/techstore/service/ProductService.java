@@ -2,6 +2,7 @@ package com.techstore.service;
 
 import com.techstore.dao.ProductDAO;
 import com.techstore.model.Product;
+import com.techstore.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -27,6 +28,14 @@ public class ProductService {
             throw new ServiceException(
                     "Unable to load products",
                     e);
+        }
+    }
+
+    public List<Product> getAllProductsIncludingInactive() throws ServiceException {
+        try {
+            return productDAO.getAllProductsIncludingInactive();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to load products", e);
         }
     }
 
@@ -74,7 +83,7 @@ public class ProductService {
 
         try {
 
-            keyword = sanitize(keyword);
+            keyword = ValidationUtil.sanitizeInput(keyword);
 
             if (keyword == null ||
                     keyword.isBlank()) {
@@ -203,29 +212,17 @@ public class ProductService {
             throw new ServiceException("Invalid stock quantity");
         }
 
-        product.setName(sanitize(product.getName()));
+        product.setName(ValidationUtil.sanitizeInput(product.getName()));
 
-        product.setBrand(sanitize(product.getBrand()));
+        product.setBrand(ValidationUtil.sanitizeInput(product.getBrand()));
 
         product.setDescription(
-                sanitize(product.getDescription()));
+                ValidationUtil.sanitizeInput(product.getDescription()));
 
         product.setSpecs(
-                sanitize(product.getSpecs()));
+                ValidationUtil.sanitizeInput(product.getSpecs()));
 
         product.setImageUrl(
-                sanitize(product.getImageUrl()));
-    }
-
-    private String sanitize(
-            String value) {
-
-        if (value == null) {
-            return null;
-        }
-
-        return value
-                .replaceAll("<[^>]*>", "")
-                .trim();
+                ValidationUtil.sanitizeInput(product.getImageUrl()));
     }
 }

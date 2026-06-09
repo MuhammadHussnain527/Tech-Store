@@ -14,6 +14,7 @@ public final class PasswordUtil {
     public static String hashPassword(String plainPassword) {
 
         if (plainPassword == null || plainPassword.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Password cannot be null or empty.");
         }
@@ -27,12 +28,22 @@ public final class PasswordUtil {
             String plainPassword,
             String hashedPassword) {
 
-        if (plainPassword == null || hashedPassword == null) {
+        if (plainPassword == null ||
+                hashedPassword == null ||
+                hashedPassword.isBlank()) {
+
             return false;
         }
 
-        return BCrypt.checkpw(
-                plainPassword,
-                hashedPassword);
+        try {
+
+            return BCrypt.checkpw(
+                    plainPassword,
+                    hashedPassword);
+
+        } catch (IllegalArgumentException e) {
+
+            return false;
+        }
     }
 }

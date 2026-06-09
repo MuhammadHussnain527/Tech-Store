@@ -25,7 +25,16 @@ public class CORSFilter implements Filter {
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        String origin = httpRequest.getHeader("Origin");
+        String allowedOrigin = request.getServletContext().getInitParameter("cors.allowed.origin");
+
+        if (origin != null && allowedOrigin != null && origin.matches(allowedOrigin)) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", origin);
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        } else if (allowedOrigin != null && "*".equals(allowedOrigin)) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        }
+
 
         httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 

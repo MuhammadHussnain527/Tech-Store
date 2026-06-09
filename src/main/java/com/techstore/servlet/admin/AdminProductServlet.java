@@ -1,6 +1,7 @@
 package com.techstore.servlet.admin;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.techstore.model.Product;
 import com.techstore.service.ProductService;
 import com.techstore.service.ServiceException;
@@ -13,14 +14,74 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-// import java.math.BigDecimal;
+import java.util.List;
 
 @WebServlet("/admin/products")
 public class AdminProductServlet extends HttpServlet {
 
-    private final ProductService productService = new ProductService();
+    private ProductService productService;
 
     private final Gson gson = new Gson();
+
+    @Override
+    public void init() throws ServletException {
+
+        productService = new ProductService();
+    }
+
+    /**
+     * GET /admin/products        — list all products (including inactive)
+     * GET /admin/products?id=1   — get single product by id
+     */
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+
+            String idParam = request.getParameter("id");
+
+            if (idParam != null) {
+
+                int productId = Integer.parseInt(idParam);
+
+                Product product = productService.getProductById(productId);
+
+                JsonResponse.sendSuccess(
+                        response,
+                        HttpServletResponse.SC_OK,
+                        "Product loaded",
+                        product);
+
+                return;
+            }
+
+            // Admin sees all products including inactive (soft-deleted)
+            List<Product> products = productService.getAllProductsIncludingInactive();
+
+            JsonResponse.sendSuccess(
+                    response,
+                    HttpServletResponse.SC_OK,
+                    "Products loaded",
+                    products);
+
+        } catch (NumberFormatException e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid product id");
+
+        } catch (ServiceException e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    e.getMessage());
+        }
+    }
 
     @Override
     protected void doPost(
@@ -42,12 +103,26 @@ public class AdminProductServlet extends HttpServlet {
                     "Product created successfully",
                     null);
 
+        } catch (JsonSyntaxException e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid JSON in request body");
+
         } catch (ServiceException e) {
 
             JsonResponse.sendError(
                     response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     e.getMessage());
+
+        } catch (Exception e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Unable to create product");
         }
     }
 
@@ -71,12 +146,26 @@ public class AdminProductServlet extends HttpServlet {
                     "Product updated successfully",
                     null);
 
+        } catch (JsonSyntaxException e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid JSON in request body");
+
         } catch (ServiceException e) {
 
             JsonResponse.sendError(
                     response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     e.getMessage());
+
+        } catch (Exception e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Unable to update product");
         }
     }
 
@@ -90,6 +179,16 @@ public class AdminProductServlet extends HttpServlet {
 
             String idParam = request.getParameter("id");
 
+            if (idParam == null || idParam.isBlank()) {
+
+                JsonResponse.sendError(
+                        response,
+                        HttpServletResponse.SC_BAD_REQUEST,
+                        "Product id is required");
+
+                return;
+            }
+
             int productId = Integer.parseInt(idParam);
 
             productService.deleteProduct(productId);
@@ -100,12 +199,19 @@ public class AdminProductServlet extends HttpServlet {
                     "Product deleted successfully",
                     null);
 
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
 
             JsonResponse.sendError(
                     response,
                     HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid request");
+                    "Invalid product id");
+
+        } catch (ServiceException e) {
+
+            JsonResponse.sendError(
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    e.getMessage());
         }
     }
 }

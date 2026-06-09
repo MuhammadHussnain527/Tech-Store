@@ -21,6 +21,10 @@ public final class JsonResponse {
             String message,
             Object data) throws IOException {
 
+        response.setHeader(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate");
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(statusCode);
@@ -39,6 +43,10 @@ public final class JsonResponse {
             HttpServletResponse response,
             int statusCode,
             String message) throws IOException {
+
+        response.setHeader(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate");
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

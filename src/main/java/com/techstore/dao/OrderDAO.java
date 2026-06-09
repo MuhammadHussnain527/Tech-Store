@@ -33,14 +33,18 @@ public class OrderDAO {
             "SET status = ? " +
             "WHERE order_id = ?";
 
-    public int createOrder(Order order)
+    private static final String COUNT_ALL_SQL = "SELECT COUNT(*) AS total FROM orders";
+
+    // ----------------------------------------------------------------
+    // Transactional overload — called inside OrderService transaction
+    // ----------------------------------------------------------------
+
+    public int createOrder(Connection connection, Order order)
             throws SQLException {
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        INSERT_ORDER_SQL,
-                        Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                INSERT_ORDER_SQL,
+                Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setObject(1, order.getUserId());
             statement.setBigDecimal(2, order.getTotalPrice());
@@ -65,6 +69,19 @@ public class OrderDAO {
         }
 
         return 0;
+    }
+
+    // ----------------------------------------------------------------
+    // Standalone (non-transactional) methods — unchanged
+    // ----------------------------------------------------------------
+
+    public int createOrder(Order order)
+            throws SQLException {
+
+        try (Connection connection = DBConnection.getConnection()) {
+
+            return createOrder(connection, order);
+        }
     }
 
     public Order getOrderById(int orderId)
@@ -144,6 +161,25 @@ public class OrderDAO {
 
             return statement.executeUpdate() > 0;
         }
+    }
+
+    // ----------------------------------------------------------------
+    // NEW: Efficient count for dashboard
+    // ----------------------------------------------------------------
+
+    public int countAllOrders() throws SQLException {
+
+        try (
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(COUNT_ALL_SQL);
+                ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("total");
+            }
+        }
+
+        return 0;
     }
 
     private Order mapRow(ResultSet resultSet)

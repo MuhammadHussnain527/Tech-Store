@@ -8,10 +8,10 @@ public final class ValidationUtil {
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private static final Pattern NAME_PATTERN = Pattern.compile(
-            "^[A-Za-z ]{2,100}$");
+            "^[A-Za-z][A-Za-z\\s'-]{1,99}$");
 
     private static final Pattern PHONE_PATTERN = Pattern.compile(
-            "^[0-9+\\-() ]{7,20}$");
+            "^\\+?[0-9\\-() ]{7,20}$");
 
     private ValidationUtil() {
         throw new UnsupportedOperationException(
@@ -35,8 +35,20 @@ public final class ValidationUtil {
             return false;
         }
 
-        return password.length() >= 8
-                && password.length() <= 100;
+        if (password.length() < 8 ||
+                password.length() > 100) {
+            return false;
+        }
+
+        boolean hasUpper = password.matches(".*[A-Z].*");
+
+        boolean hasLower = password.matches(".*[a-z].*");
+
+        boolean hasDigit = password.matches(".*\\d.*");
+
+        return hasUpper &&
+                hasLower &&
+                hasDigit;
     }
 
     public static boolean isValidName(String name) {
@@ -56,6 +68,15 @@ public final class ValidationUtil {
             return true;
         }
 
+        String cleaned = phone.replaceAll(
+                "[\\s\\-()]",
+                "");
+
+        if (cleaned.length() < 7 ||
+                cleaned.length() > 15) {
+            return false;
+        }
+
         return PHONE_PATTERN
                 .matcher(phone.trim())
                 .matches();
@@ -67,9 +88,7 @@ public final class ValidationUtil {
             return null;
         }
 
-        String sanitized = input.replaceAll(
-                "<[^>]*>",
-                "");
+        String sanitized = input.replaceAll("<[^>]*>", "");
 
         return sanitized.trim();
     }

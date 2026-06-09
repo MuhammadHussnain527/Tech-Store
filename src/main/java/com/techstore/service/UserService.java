@@ -24,10 +24,14 @@ public class UserService {
 
         try {
 
-            name = sanitize(name);
-            email = sanitize(email).toLowerCase();
-            phone = sanitize(phone);
-            address = sanitize(address);
+            name = ValidationUtil.sanitizeInput(name);
+            email = ValidationUtil.sanitizeInput(email);
+            phone = ValidationUtil.sanitizeInput(phone);
+            address = ValidationUtil.sanitizeInput(address);
+
+            if (email != null) {
+                email = email.toLowerCase();
+            }
 
             if (!ValidationUtil.isValidName(name)) {
                 throw new ServiceException("Invalid name");
@@ -37,12 +41,10 @@ public class UserService {
                 throw new ServiceException("Invalid email address");
             }
 
-            if (password == null) {
-                throw new ServiceException("Password does not meet requirements");
-            }
-
-            if (!ValidationUtil.isValidPassword(password)) {
-                throw new ServiceException("Password does not meet requirements");
+            if (password == null || !ValidationUtil.isValidPassword(password)) {
+                throw new ServiceException(
+                        "Password must be 8-100 characters and contain " +
+                        "at least one uppercase letter, one lowercase letter, and one digit");
             }
 
             if (phone != null && !phone.isBlank() && !ValidationUtil.isValidPhone(phone)) {
@@ -52,7 +54,6 @@ public class UserService {
             User existingUser = userDAO.findByEmail(email);
 
             if (existingUser != null) {
-
                 throw new ServiceException("Email already registered");
             }
 
@@ -67,12 +68,14 @@ public class UserService {
             user.setPhone(phone);
             user.setAddress(address);
 
-            boolean created = userDAO.createUser(user);
+            // createUser() now returns the generated userId (> 0 on success)
+            int generatedId = userDAO.createUser(user);
 
-            if (!created) {
-
+            if (generatedId <= 0) {
                 throw new ServiceException("Unable to create account");
             }
+
+            user.setUserId(generatedId);
 
             return user;
 
@@ -86,7 +89,11 @@ public class UserService {
 
         try {
 
-            email = sanitize(email).toLowerCase();
+            email = ValidationUtil.sanitizeInput(email);
+
+            if (email != null) {
+                email = email.toLowerCase();
+            }
 
             if (password == null) {
                 throw new ServiceException("Invalid email or password");
@@ -95,13 +102,15 @@ public class UserService {
             User user = userDAO.findByEmail(email);
 
             if (user == null) {
+                // Do NOT reveal whether the email exists
                 throw new ServiceException("Invalid email or password");
             }
 
-            boolean validPassword = PasswordUtil.verifyPassword(password, user.getPasswordHash());
+            boolean validPassword = PasswordUtil.verifyPassword(
+                    password,
+                    user.getPasswordHash());
 
             if (!validPassword) {
-
                 throw new ServiceException("Invalid email or password");
             }
 
@@ -121,17 +130,15 @@ public class UserService {
 
         try {
 
-            name = sanitize(name);
-            phone = sanitize(phone);
-            address = sanitize(address);
+            name = ValidationUtil.sanitizeInput(name);
+            phone = ValidationUtil.sanitizeInput(phone);
+            address = ValidationUtil.sanitizeInput(address);
 
             if (!ValidationUtil.isValidName(name)) {
-
                 throw new ServiceException("Invalid name");
             }
 
             if (phone != null && !phone.isBlank() && !ValidationUtil.isValidPhone(phone)) {
-
                 throw new ServiceException("Invalid phone number");
             }
 
@@ -173,14 +180,5 @@ public class UserService {
 
             throw new ServiceException("Unable to load user", e);
         }
-    }
-
-    private String sanitize(String input) {
-
-        if (input == null) {
-            return null;
-        }
-
-        return input.replaceAll("<[^>]*>", "").trim();
     }
 }

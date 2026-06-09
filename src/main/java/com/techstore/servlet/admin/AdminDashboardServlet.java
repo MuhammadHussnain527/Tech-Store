@@ -5,6 +5,7 @@ import com.techstore.dao.ProductDAO;
 import com.techstore.dao.UserDAO;
 import com.techstore.util.JsonResponse;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +18,17 @@ import java.util.Map;
 @WebServlet("/admin/dashboard")
 public class AdminDashboardServlet extends HttpServlet {
 
-    private final UserDAO userDAO = new UserDAO();
-    private final ProductDAO productDAO = new ProductDAO();
-    private final OrderDAO orderDAO = new OrderDAO();
+    private UserDAO userDAO;
+    private ProductDAO productDAO;
+    private OrderDAO orderDAO;
+
+    @Override
+    public void init() throws ServletException {
+
+        userDAO = new UserDAO();
+        productDAO = new ProductDAO();
+        orderDAO = new OrderDAO();
+    }
 
     @Override
     protected void doGet(
@@ -31,17 +40,12 @@ public class AdminDashboardServlet extends HttpServlet {
 
             Map<String, Object> dashboard = new LinkedHashMap<>();
 
-            dashboard.put(
-                    "totalUsers",
-                    userDAO.getAllUsers().size());
+            // Use COUNT(*) queries — never load entire tables just to count them
+            dashboard.put("totalUsers", userDAO.countAllUsers());
 
-            dashboard.put(
-                    "totalProducts",
-                    productDAO.getAllProducts().size());
+            dashboard.put("totalProducts", productDAO.countAllProducts());
 
-            dashboard.put(
-                    "totalOrders",
-                    orderDAO.getAllOrders().size());
+            dashboard.put("totalOrders", orderDAO.countAllOrders());
 
             JsonResponse.sendSuccess(
                     response,

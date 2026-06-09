@@ -19,21 +19,36 @@ public class OrderItemDAO {
 
     private static final String GET_ORDER_ITEMS_SQL = "SELECT * FROM order_items WHERE order_id = ?";
 
-    public boolean addOrderItem(OrderItem orderItem)
+    // ----------------------------------------------------------------
+    // Transactional overload — called inside OrderService transaction
+    // ----------------------------------------------------------------
+
+    public boolean addOrderItem(Connection connection, OrderItem orderItem)
             throws SQLException {
 
-        try (
-                Connection connection = DBConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(INSERT_ORDER_ITEM_SQL)) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_ORDER_ITEM_SQL)) {
 
             statement.setInt(1, orderItem.getOrderId());
-            statement.setObject(2, orderItem.getProductId());
+            statement.setInt(2, orderItem.getProductId());
             statement.setString(3, orderItem.getProductName());
             statement.setInt(4, orderItem.getQuantity());
             statement.setBigDecimal(5, orderItem.getUnitPrice());
             statement.setBigDecimal(6, orderItem.getSubtotal());
 
             return statement.executeUpdate() > 0;
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // Standalone (non-transactional) methods
+    // ----------------------------------------------------------------
+
+    public boolean addOrderItem(OrderItem orderItem)
+            throws SQLException {
+
+        try (Connection connection = DBConnection.getConnection()) {
+
+            return addOrderItem(connection, orderItem);
         }
     }
 
@@ -71,7 +86,7 @@ public class OrderItemDAO {
                 resultSet.getInt("order_id"));
 
         item.setProductId(
-                (Integer) resultSet.getObject("product_id"));
+                resultSet.getInt("product_id"));
 
         item.setProductName(
                 resultSet.getString("product_name"));

@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ public class UserDAO {
             "WHERE user_id = ?";
 
     private static final String GET_ALL_USERS_SQL = "SELECT * FROM users ORDER BY created_at DESC";
+
+    private static final String COUNT_ALL_SQL = "SELECT COUNT(*) AS total FROM users";
 
     public User findById(int userId) throws SQLException {
 
@@ -66,11 +69,18 @@ public class UserDAO {
         return null;
     }
 
-    public boolean createUser(User user) throws SQLException {
+    /**
+     * Creates a new user and returns the generated userId.
+     *
+     * @return the generated userId (> 0), or 0 if insertion failed.
+     */
+    public int createUser(User user) throws SQLException {
 
         try (
                 Connection connection = DBConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(INSERT_USER_SQL)) {
+                PreparedStatement statement = connection.prepareStatement(
+                        INSERT_USER_SQL,
+                        Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
@@ -79,8 +89,21 @@ public class UserDAO {
             statement.setString(5, user.getPhone());
             statement.setString(6, user.getAddress());
 
-            return statement.executeUpdate() > 0;
+            int affected = statement.executeUpdate();
+
+            if (affected == 0) {
+                return 0;
+            }
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
         }
+
+        return 0;
     }
 
     public boolean updateUser(User user) throws SQLException {
@@ -113,6 +136,21 @@ public class UserDAO {
         }
 
         return users;
+    }
+
+    public int countAllUsers() throws SQLException {
+
+        try (
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(COUNT_ALL_SQL);
+                ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("total");
+            }
+        }
+
+        return 0;
     }
 
     private User mapRow(ResultSet resultSet) throws SQLException {

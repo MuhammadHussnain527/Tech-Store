@@ -144,7 +144,16 @@ public class OrderServlet extends HttpServlet {
 
                         order.setShippingPhone((String) body.get("shippingPhone"));
 
-                        order.setPaymentMethod((String) body.get("paymentMethod"));
+                        String paymentMethod = (String) body.get("paymentMethod");
+                        if (paymentMethod != null) {
+                                paymentMethod = paymentMethod.trim().toUpperCase();
+                        }
+
+                        if (!java.util.Set.of("CREDIT_CARD", "PAYPAL", "BANK_TRANSFER").contains(paymentMethod)) {
+                                throw new ServiceException("Invalid payment method. Allowed values: CREDIT_CARD, PAYPAL, BANK_TRANSFER");
+                        }
+
+                        order.setPaymentMethod(paymentMethod);
 
                         if (order.getShippingName() == null ||
                                         order.getShippingName().isBlank()) {

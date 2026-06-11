@@ -1,22 +1,24 @@
 package com.techstore.service;
 
-import com.techstore.dao.CartDAO;
-import com.techstore.dao.ProductDAO;
+import com.techstore.repository.CartRepository;
+import com.techstore.repository.ProductRepository;
+import com.techstore.dto.CartItemResponse;
 import com.techstore.model.CartItem;
 import com.techstore.model.Product;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class CartService {
 
-    private final CartDAO cartDAO;
-    private final ProductDAO productDAO;
+    @Autowired
+    private CartRepository CartRepository;
 
-    public CartService() {
-        this.cartDAO = new CartDAO();
-        this.productDAO = new ProductDAO();
-    }
+    @Autowired
+    private ProductRepository ProductRepository;
 
     public void addToCart(
             int userId,
@@ -37,7 +39,7 @@ public class CartService {
                 throw new ServiceException("Quantity must be greater than zero");
             }
 
-            Product product = productDAO.getProductById(productId);
+            Product product = ProductRepository.getProductById(productId);
 
             if (product == null) {
                 throw new ServiceException("Product not found");
@@ -51,7 +53,7 @@ public class CartService {
                 throw new ServiceException("Not enough stock available");
             }
 
-            CartItem existingItem = cartDAO.getCartItem(
+            CartItem existingItem = CartRepository.getCartItem(
                     userId,
                     productId);
 
@@ -64,11 +66,11 @@ public class CartService {
                     throw new ServiceException("Not enough stock available");
                 }
 
-                cartDAO.updateQuantity(userId, productId, newQuantity);
+                CartRepository.updateQuantity(userId, productId, newQuantity);
 
             } else {
 
-                cartDAO.addToCart(
+                CartRepository.addToCart(
                         userId,
                         productId,
                         quantity);
@@ -80,15 +82,10 @@ public class CartService {
         }
     }
 
-    public List<CartItem> getCartItems(
-            int userId) throws ServiceException {
-
+    public List<CartItemResponse> getCartItems(int userId) throws ServiceException {
         try {
-
-            return cartDAO.getCartItems(userId);
-
+            return CartRepository.getEnrichedCartItems(userId);
         } catch (SQLException e) {
-
             throw new ServiceException("Unable to load cart", e);
         }
     }
@@ -105,7 +102,7 @@ public class CartService {
                 throw new ServiceException("Quantity must be greater than zero");
             }
 
-            Product product = productDAO.getProductById(productId);
+            Product product = ProductRepository.getProductById(productId);
 
             if (product == null) {
 
@@ -117,7 +114,7 @@ public class CartService {
                 throw new ServiceException("Not enough stock available");
             }
 
-            boolean updated = cartDAO.updateQuantity(userId, productId, quantity);
+            boolean updated = CartRepository.updateQuantity(userId, productId, quantity);
 
             if (!updated) {
 
@@ -134,7 +131,7 @@ public class CartService {
 
         try {
 
-            boolean removed = cartDAO.removeItem(userId, productId);
+            boolean removed = CartRepository.removeItem(userId, productId);
 
             if (!removed) {
 
@@ -151,7 +148,7 @@ public class CartService {
 
         try {
 
-            cartDAO.clearCart(userId);
+            CartRepository.clearCart(userId);
 
         } catch (SQLException e) {
 

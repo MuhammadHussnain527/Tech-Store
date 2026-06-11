@@ -1,23 +1,23 @@
 package com.techstore.service;
 
-import com.techstore.dao.CategoryDAO;
+import com.techstore.repository.CategoryRepository;
 import com.techstore.model.Category;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.techstore.util.ValidationUtil;
 
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class CategoryService {
 
-    private final CategoryDAO categoryDAO;
-
-    public CategoryService() {
-        this.categoryDAO = new CategoryDAO();
-    }
+    @Autowired
+    private CategoryRepository CategoryRepository;
 
     public List<Category> getAllCategories() throws ServiceException {
         try {
-            return categoryDAO.getAllCategories();
+            return CategoryRepository.getAllCategories();
         } catch (SQLException e) {
             throw new ServiceException("Unable to load categories", e);
         }
@@ -28,7 +28,7 @@ public class CategoryService {
             if (categoryId <= 0) {
                 throw new ServiceException("Invalid category id");
             }
-            Category category = categoryDAO.getCategoryById(categoryId);
+            Category category = CategoryRepository.getCategoryById(categoryId);
             if (category == null) {
                 throw new ServiceException("Category not found");
             }
@@ -44,7 +44,7 @@ public class CategoryService {
             if (slug == null || slug.isBlank()) {
                 throw new ServiceException("Invalid category slug");
             }
-            Category category = categoryDAO.getCategoryBySlug(slug);
+            Category category = CategoryRepository.getCategoryBySlug(slug);
             if (category == null) {
                 throw new ServiceException("Category not found");
             }
@@ -57,11 +57,11 @@ public class CategoryService {
     public void createCategory(Category category) throws ServiceException {
         try {
             validateCategory(category);
-            Category existing = categoryDAO.getCategoryBySlug(category.getSlug());
+            Category existing = CategoryRepository.getCategoryBySlug(category.getSlug());
             if (existing != null) {
                 throw new ServiceException("Category slug already exists");
             }
-            boolean created = categoryDAO.createCategory(category);
+            boolean created = CategoryRepository.createCategory(category);
             if (!created) {
                 throw new ServiceException("Unable to create category");
             }
@@ -73,15 +73,15 @@ public class CategoryService {
     public void updateCategory(Category category) throws ServiceException {
         try {
             validateCategory(category);
-            Category existing = categoryDAO.getCategoryById(category.getCategoryId());
+            Category existing = CategoryRepository.getCategoryById(category.getCategoryId());
             if (existing == null) {
                 throw new ServiceException("Category not found");
             }
-            Category slugOwner = categoryDAO.getCategoryBySlug(category.getSlug());
+            Category slugOwner = CategoryRepository.getCategoryBySlug(category.getSlug());
             if (slugOwner != null && slugOwner.getCategoryId() != category.getCategoryId()) {
                 throw new ServiceException("Category slug already exists");
             }
-            boolean updated = categoryDAO.updateCategory(category);
+            boolean updated = CategoryRepository.updateCategory(category);
             if (!updated) {
                 throw new ServiceException("Unable to update category");
             }
@@ -95,7 +95,7 @@ public class CategoryService {
             if (categoryId <= 0) {
                 throw new ServiceException("Invalid category id");
             }
-            boolean deleted = categoryDAO.deleteCategory(categoryId);
+            boolean deleted = CategoryRepository.deleteCategory(categoryId);
             if (!deleted) {
                 throw new ServiceException("Category not found");
             }

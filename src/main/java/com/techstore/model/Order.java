@@ -2,6 +2,7 @@ package com.techstore.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Order {
 
@@ -15,6 +16,7 @@ public class Order {
     private String paymentMethod;
     private LocalDateTime orderDate;
     private LocalDateTime updatedAt;
+    private List<OrderItem> items;
 
     public Order() {
     }
@@ -120,5 +122,13 @@ public class Order {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<OrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
     }
 }

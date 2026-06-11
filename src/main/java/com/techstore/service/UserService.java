@@ -1,19 +1,19 @@
 package com.techstore.service;
 
-import com.techstore.dao.UserDAO;
+import com.techstore.repository.UserRepository;
 import com.techstore.model.User;
 import com.techstore.util.PasswordUtil;
 import com.techstore.util.ValidationUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.SQLException;
 
+@Service
 public class UserService {
 
-    private final UserDAO userDAO;
-
-    public UserService() {
-        this.userDAO = new UserDAO();
-    }
+    @Autowired
+    private UserRepository UserRepository;
 
     public User registerUser(
             String name,
@@ -51,7 +51,7 @@ public class UserService {
                 throw new ServiceException("Invalid phone number");
             }
 
-            User existingUser = userDAO.findByEmail(email);
+            User existingUser = UserRepository.findByEmail(email);
 
             if (existingUser != null) {
                 throw new ServiceException("Email already registered");
@@ -69,7 +69,7 @@ public class UserService {
             user.setAddress(address);
 
             // createUser() now returns the generated userId (> 0 on success)
-            int generatedId = userDAO.createUser(user);
+            int generatedId = UserRepository.createUser(user);
 
             if (generatedId <= 0) {
                 throw new ServiceException("Unable to create account");
@@ -99,7 +99,7 @@ public class UserService {
                 throw new ServiceException("Invalid email or password");
             }
 
-            User user = userDAO.findByEmail(email);
+            User user = UserRepository.findByEmail(email);
 
             if (user == null) {
                 // Do NOT reveal whether the email exists
@@ -142,7 +142,7 @@ public class UserService {
                 throw new ServiceException("Invalid phone number");
             }
 
-            User user = userDAO.findById(userId);
+            User user = UserRepository.findById(userId);
 
             if (user == null) {
                 throw new ServiceException("User not found");
@@ -152,7 +152,7 @@ public class UserService {
             user.setPhone(phone);
             user.setAddress(address);
 
-            boolean updated = userDAO.updateUser(user);
+            boolean updated = UserRepository.updateUser(user);
 
             if (!updated) {
                 throw new ServiceException("Profile update failed");
@@ -168,7 +168,7 @@ public class UserService {
 
         try {
 
-            User user = userDAO.findById(userId);
+            User user = UserRepository.findById(userId);
 
             if (user == null) {
                 throw new ServiceException("User not found");
@@ -179,6 +179,14 @@ public class UserService {
         } catch (SQLException e) {
 
             throw new ServiceException("Unable to load user", e);
+        }
+    }
+
+    public int countAllUsers() throws ServiceException {
+        try {
+            return UserRepository.countAllUsers();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to count users", e);
         }
     }
 }

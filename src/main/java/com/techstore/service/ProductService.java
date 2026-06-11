@@ -1,19 +1,22 @@
 package com.techstore.service;
 
-import com.techstore.dao.ProductDAO;
+import com.techstore.repository.ProductRepository;
 import com.techstore.model.Product;
 import com.techstore.util.ValidationUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class ProductService {
 
-    private final ProductDAO productDAO;
+    @Autowired
+    private ProductRepository ProductRepository;
 
     public ProductService() {
-        this.productDAO = new ProductDAO();
     }
 
     public List<Product> getAllProducts()
@@ -21,7 +24,7 @@ public class ProductService {
 
         try {
 
-            return productDAO.getAllProducts();
+            return ProductRepository.getAllProducts();
 
         } catch (SQLException e) {
 
@@ -33,7 +36,7 @@ public class ProductService {
 
     public List<Product> getAllProductsIncludingInactive() throws ServiceException {
         try {
-            return productDAO.getAllProductsIncludingInactive();
+            return ProductRepository.getAllProductsIncludingInactive();
         } catch (SQLException e) {
             throw new ServiceException("Unable to load products", e);
         }
@@ -44,7 +47,7 @@ public class ProductService {
 
         try {
 
-            Product product = productDAO.getProductById(productId);
+            Product product = ProductRepository.getProductById(productId);
 
             if (product == null) {
 
@@ -67,7 +70,7 @@ public class ProductService {
 
         try {
 
-            return productDAO.getProductsByCategory(
+            return ProductRepository.getProductsByCategory(
                     categoryId);
 
         } catch (SQLException e) {
@@ -92,7 +95,7 @@ public class ProductService {
                         "Search keyword required");
             }
 
-            return productDAO.searchProducts(
+            return ProductRepository.searchProducts(
                     keyword);
 
         } catch (SQLException e) {
@@ -110,7 +113,7 @@ public class ProductService {
 
         try {
 
-            boolean created = productDAO.addProduct(product);
+            boolean created = ProductRepository.addProduct(product);
 
             if (!created) {
 
@@ -133,7 +136,7 @@ public class ProductService {
 
         try {
 
-            Product existing = productDAO.getProductById(
+            Product existing = ProductRepository.getProductById(
                     product.getProductId());
 
             if (existing == null) {
@@ -142,7 +145,7 @@ public class ProductService {
                         "Product not found");
             }
 
-            boolean updated = productDAO.updateProduct(product);
+            boolean updated = ProductRepository.updateProduct(product);
 
             if (!updated) {
 
@@ -163,7 +166,7 @@ public class ProductService {
 
         try {
 
-            Product existing = productDAO.getProductById(
+            Product existing = ProductRepository.getProductById(
                     productId);
 
             if (existing == null) {
@@ -172,7 +175,7 @@ public class ProductService {
                         "Product not found");
             }
 
-            boolean deleted = productDAO.deleteProduct(productId);
+            boolean deleted = ProductRepository.deleteProduct(productId);
 
             if (!deleted) {
 
@@ -224,5 +227,13 @@ public class ProductService {
 
         product.setImageUrl(
                 ValidationUtil.sanitizeInput(product.getImageUrl()));
+    }
+
+    public int countAllProducts() throws ServiceException {
+        try {
+            return ProductRepository.countAllProducts();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to count products", e);
+        }
     }
 }

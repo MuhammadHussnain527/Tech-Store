@@ -16,6 +16,7 @@ public class Product {
     private String specs;
     private boolean active;
     private LocalDateTime createdAt;
+    private double averageRating;
 
     public Product() {
     }
@@ -132,5 +133,13 @@ public class Product {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
     }
 }

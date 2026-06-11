@@ -1,14 +1,16 @@
 package com.techstore.service;
 
-import com.techstore.dao.CartDAO;
-import com.techstore.dao.OrderDAO;
-import com.techstore.dao.OrderItemDAO;
-import com.techstore.dao.ProductDAO;
+import com.techstore.repository.CartRepository;
+import com.techstore.repository.OrderRepository;
+import com.techstore.repository.OrderItemRepository;
+import com.techstore.repository.ProductRepository;
 import com.techstore.model.CartItem;
 import com.techstore.model.Order;
 import com.techstore.model.OrderItem;
 import com.techstore.model.Product;
-import com.techstore.util.DBConnection;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import javax.sql.DataSource;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -17,23 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Service
 public class OrderService {
 
     // Allowed order statuses — enforced in updateOrderStatus()
     private static final Set<String> VALID_STATUSES = Set.of(
             "PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED");
 
-    private final OrderDAO orderDAO;
-    private final OrderItemDAO orderItemDAO;
-    private final CartDAO cartDAO;
-    private final ProductDAO productDAO;
-
-    public OrderService() {
-        this.orderDAO = new OrderDAO();
-        this.orderItemDAO = new OrderItemDAO();
-        this.cartDAO = new CartDAO();
-        this.productDAO = new ProductDAO();
-    }
+    @Autowired
+    private OrderRepository OrderRepository;
+    @Autowired
+    private OrderItemRepository OrderItemRepository;
+    @Autowired
+    private CartRepository CartRepository;
+    @Autowired
+    private ProductRepository ProductRepository;
+    @Autowired
+    private DataSource dataSource;
 
     /**
      * Places an order within a single JDBC transaction.
@@ -67,13 +69,13 @@ public class OrderService {
 
         try {
 
-            List<CartItem> cartItems = cartDAO.getCartItems(order.getUserId());
+            List<CartItem> cartItems = CartRepository.getCartItems(order.getUserId());
 
             if (cartItems.isEmpty()) {
                 throw new ServiceException("Cart is empty");
             }
 
-            try (Connection connection = DBConnection.getConnection()) {
+            try (Connection connection = dataSource.getConnection()) {
 
                 connection.setAutoCommit(false);
 
@@ -87,7 +89,7 @@ public class OrderService {
 
                         // SELECT ... FOR UPDATE prevents concurrent reads from
                         // seeing stale stock and double-committing the same units
-                        Product product = productDAO.getProductByIdForUpdate(
+                        Product product = ProductRepository.getProductByIdForUpdate(
                                 connection,
                                 cartItem.getProductId());
 
@@ -127,7 +129,7 @@ public class OrderService {
                     order.setTotalPrice(totalPrice);
 
                     // Phase 3: Persist order header
-                    int orderId = orderDAO.createOrder(connection, order);
+                    int orderId = OrderRepository.createOrder(connection, order);
 
                     if (orderId <= 0) {
                         throw new ServiceException("Failed to create order record");
@@ -138,9 +140,9 @@ public class OrderService {
 
                         orderItem.setOrderId(orderId);
 
-                        orderItemDAO.addOrderItem(connection, orderItem);
+                        OrderItemRepository.addOrderItem(connection, orderItem);
 
-                        boolean deducted = productDAO.deductStock(
+                        boolean deducted = ProductRepository.deductStock(
                                 connection,
                                 orderItem.getProductId(),
                                 orderItem.getQuantity());
@@ -153,7 +155,7 @@ public class OrderService {
                     }
 
                     // Phase 5: Clear the cart
-                    cartDAO.clearCart(connection, order.getUserId());
+                    CartRepository.clearCart(connection, order.getUserId());
 
                     // All operations succeeded — commit
                     connection.commit();
@@ -181,21 +183,15 @@ public class OrderService {
         }
     }
 
-    public Order getOrderById(int orderId)
-            throws ServiceException {
-
+    public Order getOrderById(int orderId) throws ServiceException {
         try {
-
-            Order order = orderDAO.getOrderById(orderId);
-
+            Order order = OrderRepository.getOrderById(orderId);
             if (order == null) {
                 throw new ServiceException("Order not found");
             }
-
+            order.setItems(OrderItemRepository.getOrderItemsByOrderId(orderId));
             return order;
-
         } catch (SQLException e) {
-
             throw new ServiceException("Unable to load order", e);
         }
     }
@@ -205,7 +201,7 @@ public class OrderService {
 
         try {
 
-            return orderDAO.getOrdersByUser(userId);
+            return OrderRepository.getOrdersByUser(userId);
 
         } catch (SQLException e) {
 
@@ -218,7 +214,7 @@ public class OrderService {
 
         try {
 
-            return orderDAO.getAllOrders();
+            return OrderRepository.getAllOrders();
 
         } catch (SQLException e) {
 
@@ -226,38 +222,65 @@ public class OrderService {
         }
     }
 
-    public void updateOrderStatus(
-            int orderId,
-            String status)
-            throws ServiceException {
+    public void updateOrderStatus(int orderId, String status) throws ServiceException {
+        if (orderId <= 0) {
+            throw new ServiceException("Invalid order id");
+        }
 
-        try {
+        if (status == null || status.isBlank()) {
+            throw new ServiceException("Status is required");
+        }
 
-            if (orderId <= 0) {
-                throw new ServiceException("Invalid order id");
+        String normalizedStatus = status.trim().toUpperCase();
+
+        if (!VALID_STATUSES.contains(normalizedStatus)) {
+            throw new ServiceException(
+                    "Invalid status. Allowed values: " +
+                    String.join(", ", VALID_STATUSES));
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try {
+                Order order = OrderRepository.getOrderById(orderId);
+                if (order == null) {
+                    throw new ServiceException("Order not found");
+                }
+
+                String previousStatus = order.getStatus();
+
+                if ("CANCELLED".equals(normalizedStatus)
+                        && !"CANCELLED".equals(previousStatus)) {
+                    List<OrderItem> items = OrderItemRepository.getOrderItemsByOrderId(orderId);
+                    for (OrderItem item : items) {
+                        ProductRepository.restoreStock(connection, item.getProductId(), item.getQuantity());
+                    }
+                }
+
+                boolean updated = OrderRepository.updateOrderStatus(connection, orderId, normalizedStatus);
+                if (!updated) {
+                    throw new ServiceException("Order not found");
+                }
+
+                connection.commit();
+            } catch (ServiceException e) {
+                connection.rollback();
+                throw e;
+            } catch (Exception e) {
+                connection.rollback();
+                throw new ServiceException("Unable to update order", e);
             }
-
-            if (status == null || status.isBlank()) {
-                throw new ServiceException("Status is required");
-            }
-
-            String normalizedStatus = status.trim().toUpperCase();
-
-            if (!VALID_STATUSES.contains(normalizedStatus)) {
-                throw new ServiceException(
-                        "Invalid status. Allowed values: " +
-                        String.join(", ", VALID_STATUSES));
-            }
-
-            boolean updated = orderDAO.updateOrderStatus(orderId, normalizedStatus);
-
-            if (!updated) {
-                throw new ServiceException("Order not found");
-            }
-
         } catch (SQLException e) {
-
             throw new ServiceException("Unable to update order", e);
+        }
+    }
+
+    public int countAllOrders() throws ServiceException {
+        try {
+            return OrderRepository.countAllOrders();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to count orders", e);
         }
     }
 }

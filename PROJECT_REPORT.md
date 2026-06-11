@@ -1,4 +1,4 @@
-# TechStore - Inventory and Sales Management System
+# TechStore - Inventory and Sales Management System Report
 
 TechStore is a modern web application designed for a computer store to manage product inventory, sales, customer accounts, and order processing. The system features a custom-built, lightweight architecture utilizing a Spring Boot backend and a React (Vite + Tailwind CSS v4) frontend.
 
@@ -59,7 +59,7 @@ graph TD
 
 ## 3. Database Schema & ERD
 
-The database uses a standard normalized relational structure. The schema is initialized in the backend resources via [schema.sql](src/main/resources/schema.sql).
+The database uses a standard normalized relational structure. The schema is initialized in the backend resources via [schema.sql](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/resources/schema.sql).
 
 ### Entity Relationship Diagram (ERD)
 
@@ -153,13 +153,13 @@ erDiagram
 
 ### Backend (Spring Boot REST Server)
 
-The backend code is organized into clean functional packages under [src/main/java/com/techstore/](src/main/java/com/techstore/):
+The backend code is organized into clean functional packages under [src/main/java/com/techstore/](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/java/com/techstore/):
 
 *   **`config`**
-    *   [WebConfig.java](src/main/java/com/techstore/config/WebConfig.java): Registers the security interceptors, sets up CORS permissions, and configures static asset hosting for product images.
+    *   [WebConfig.java](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/java/com/techstore/config/WebConfig.java): Registers the security interceptors, sets up CORS permissions, and configures static asset hosting for product images.
 *   **`interceptor`**
-    *   [AuthInterceptor.java](src/main/java/com/techstore/interceptor/AuthInterceptor.java): Inspects HTTP requests to `/cart/**`, `/orders/**`, and `/profile/**` for valid active sessions.
-    *   [AdminInterceptor.java](src/main/java/com/techstore/interceptor/AdminInterceptor.java): Checks if the active user role is strictly `ADMIN` for calls to `/admin/**`.
+    *   [AuthInterceptor.java](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/java/com/techstore/interceptor/AuthInterceptor.java): Inspects HTTP requests to `/cart/**`, `/orders/**`, and `/profile/**` for valid active sessions.
+    *   [AdminInterceptor.java](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/java/com/techstore/interceptor/AdminInterceptor.java): Checks if the active user role is strictly `ADMIN` for calls to `/admin/**`.
 *   **`controller`**
     *   `AuthController`: Manages credentials, starts sessions, handles register/login, and session validation.
     *   `ProductController` / `CategoryController`: Public read access to inventory.
@@ -174,7 +174,7 @@ The backend code is organized into clean functional packages under [src/main/jav
 
 ### Frontend (React Application)
 
-The client application resides in the [frontend/](frontend/) folder:
+The client application resides in the [frontend/](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/frontend/) folder:
 
 *   **State Management (Context API)**
     *   `AuthContext.jsx`: Keeps track of user information, roles, and sign-in status across views.
@@ -195,7 +195,7 @@ The client application resides in the [frontend/](frontend/) folder:
 ## 5. Security and Session Management
 
 Unlike traditional JWT/Spring Security architectures, TechStore implements a custom, secure **Session-Based Cookie System**:
-1. **Passwords Hashing**: Customer and Admin passwords are secure-hashed using `jBCrypt` strength checks prior to writing to the database.
+1. **Passwords Hashing**: Customer and Admin passwords are secure-hashed using `jBCrypt` strength checks prior to writing to the database database.
 2. **HttpSession Storage**: Upon signing in, the server generates a session storing `userId` and `userRole` within standard container sessions.
 3. **Session Cookies**: The cookie `JSESSIONID` is returned with `http-only` and `same-site=lax` properties preventing external client scripts from accessing session tokens.
 4. **Backend Interceptors**: Standard Spring Interceptors validate the session metadata automatically before forwarding calls. No Spring Security configuration overhead is needed.
@@ -206,8 +206,8 @@ Unlike traditional JWT/Spring Security architectures, TechStore implements a cus
 
 ### 1. Database Setup
 1. Create a MySQL database instance.
-2. Import/execute the SQL code inside [schema.sql](src/main/resources/schema.sql) to initialize structures.
-3. Adjust the credentials in [application.properties](src/main/resources/application.properties):
+2. Import/execute the SQL code inside [schema.sql](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/resources/schema.sql) to initialize structures.
+3. Adjust the credentials in [application.properties](file:///c:/Users/Muhammad%20Hussnain/OneDrive/Documents/2nd%20Semester/Projects/project2/techstore/src/main/resources/application.properties):
    ```properties
    spring.datasource.url=jdbc:mysql://localhost:3306/techstore_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
    spring.datasource.username=your_username

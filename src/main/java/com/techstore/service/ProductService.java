@@ -236,4 +236,12 @@ public class ProductService {
             throw new ServiceException("Unable to count products", e);
         }
     }
+
+    public List<Product> getLowStockProducts(int threshold) throws ServiceException {
+        try {
+            return ProductRepository.getLowStockProducts(threshold);
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to load low stock products", e);
+        }
+    }
 }

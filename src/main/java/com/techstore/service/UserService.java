@@ -189,4 +189,59 @@ public class UserService {
             throw new ServiceException("Unable to count users", e);
         }
     }
+
+    /**
+     * Change password for an authenticated user (requires old password verification).
+     */
+    public void changePassword(int userId, String oldPassword, String newPassword) throws ServiceException {
+        try {
+            User user = UserRepository.findById(userId);
+            if (user == null) {
+                throw new ServiceException("User not found");
+            }
+            if (!PasswordUtil.verifyPassword(oldPassword, user.getPasswordHash())) {
+                throw new ServiceException("Current password is incorrect");
+            }
+            if (newPassword == null || !ValidationUtil.isValidPassword(newPassword)) {
+                throw new ServiceException(
+                        "New password must be 8-100 characters and contain " +
+                        "at least one uppercase letter, one lowercase letter, and one digit");
+            }
+            String newHash = PasswordUtil.hashPassword(newPassword);
+            boolean updated = UserRepository.updatePasswordById(userId, newHash);
+            if (!updated) {
+                throw new ServiceException("Password update failed");
+            }
+        } catch (SQLException e) {
+            throw new ServiceException("Password change failed", e);
+        }
+    }
+
+    /**
+     * Reset password without old-password check (forgot-password flow).
+     * Verifies the email exists before resetting.
+     */
+    public void resetPassword(String email, String newPassword) throws ServiceException {
+        try {
+            email = ValidationUtil.sanitizeInput(email);
+            if (email != null) email = email.toLowerCase();
+
+            if (!ValidationUtil.isValidEmail(email)) {
+                throw new ServiceException("Invalid email address");
+            }
+            if (!UserRepository.emailExists(email)) {
+                // Do not reveal whether email is registered
+                throw new ServiceException("If this email is registered, the password has been reset.");
+            }
+            if (newPassword == null || !ValidationUtil.isValidPassword(newPassword)) {
+                throw new ServiceException(
+                        "Password must be 8-100 characters and contain " +
+                        "at least one uppercase letter, one lowercase letter, and one digit");
+            }
+            String newHash = PasswordUtil.hashPassword(newPassword);
+            UserRepository.updatePasswordByEmail(email, newHash);
+        } catch (SQLException e) {
+            throw new ServiceException("Password reset failed", e);
+        }
+    }
 }

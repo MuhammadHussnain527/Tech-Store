@@ -1,19 +1,34 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Cpu, Menu, X, User, LayoutDashboard, LogOut, Sun, Moon } from 'lucide-react';
+import { Cpu, Menu, X, User, LayoutDashboard, LogOut, Sun, Moon, Search, Heart, Bell, ChevronDown } from 'lucide-react';
 import CartIcon from './CartIcon';
 import useAuth from '../hooks/useAuth';
 import { useTheme } from '../context/ThemeContext';
+import { useNotification } from '../context/NotificationContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export default function Navbar() {
   const { user, isLoggedIn, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { unreadCount } = useNotification();
+  const { wishlist } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
   };
 
   const linkCls = ({ isActive }) =>
@@ -33,14 +48,73 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            <NavLink to="/"        className={linkCls} end>Home</NavLink>
-            <NavLink to="/shop"    className={linkCls}>Shop</NavLink>
+          <nav className="hidden md:flex items-center gap-8">
+            <NavLink to="/" className={linkCls} end>Home</NavLink>
+            
+            {/* Mega Menu Trigger */}
+            <div className="relative group h-20 flex items-center">
+              <NavLink to="/shop" className={`flex items-center gap-1 ${linkCls({ isActive: window.location.pathname === '/shop' })}`}>
+                Shop <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
+              </NavLink>
+              
+              {/* Mega Menu Dropdown */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[600px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
+                <div className="mt-2 p-6 card-glass rounded-2xl grid grid-cols-3 gap-8">
+                  <div>
+                    <h4 className="text-gold-500 font-bold mb-4 uppercase tracking-widest text-xs">Categories</h4>
+                    <ul className="space-y-3">
+                      <li><Link to="/shop?category=Laptops" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">Laptops</Link></li>
+                      <li><Link to="/shop?category=Smartphones" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">Smartphones</Link></li>
+                      <li><Link to="/shop?category=Audio" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">Audio</Link></li>
+                      <li><Link to="/shop?category=Accessories" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">Accessories</Link></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-gold-500 font-bold mb-4 uppercase tracking-widest text-xs">Featured</h4>
+                    <ul className="space-y-3">
+                      <li><Link to="/shop?sort=new" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">New Arrivals</Link></li>
+                      <li><Link to="/shop?sort=popular" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">Best Sellers</Link></li>
+                      <li><Link to="/shop?discount=true" className="text-sm font-medium text-midnight-700 dark:text-slate-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">On Sale</Link></li>
+                    </ul>
+                  </div>
+                  <div className="col-span-1 rounded-xl overflow-hidden relative bg-midnight-900 group/promo">
+                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80" alt="Promo" className="w-full h-full object-cover opacity-60 group-hover/promo:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                      <span className="text-white font-bold text-lg mb-2">Summer Sale</span>
+                      <Link to="/shop?discount=true" className="badge badge-gold">Up to 40% OFF</Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {isAdmin && <NavLink to="/admin" className={linkCls}>Admin</NavLink>}
           </nav>
 
           {/* Right side */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
+            {/* Search */}
+            <div className="relative flex items-center">
+              <div className={`overflow-hidden transition-all duration-300 ${searchOpen ? 'w-48 opacity-100 mr-2' : 'w-0 opacity-0'}`}>
+                <form onSubmit={handleSearch}>
+                  <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-midnight-50 dark:bg-midnight-800 text-sm px-4 py-1.5 rounded-full border border-midnight-200 dark:border-midnight-700 focus:outline-none focus:border-gold-500"
+                  />
+                </form>
+              </div>
+              <button 
+                onClick={() => setSearchOpen(!searchOpen)} 
+                className="p-2 rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300"
+                aria-label="Search"
+              >
+                <Search size={18} />
+              </button>
+            </div>
+
             <button 
               onClick={toggleTheme} 
               className="p-2 rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300"
@@ -48,7 +122,31 @@ export default function Navbar() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {isLoggedIn && <CartIcon />}
+            
+            {isLoggedIn && (
+              <>
+                <Link to="/profile?tab=wishlist" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
+                  <Heart size={18} />
+                  {wishlist?.length > 0 && (
+                    <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-midnight-900">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Link>
+                
+                <Link to="/profile?tab=notifications" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-midnight-900">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+                
+                <CartIcon />
+              </>
+            )}
+
             {isLoggedIn ? (
               <div className="relative group">
                 <button className="flex items-center gap-2 text-midnight-700 dark:text-slate-300 hover:text-midnight-900 dark:hover:text-white text-sm font-bold tracking-widest uppercase transition-colors">

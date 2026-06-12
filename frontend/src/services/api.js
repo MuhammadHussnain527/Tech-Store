@@ -23,16 +23,18 @@ async function request(path, options = {}) {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 export const authApi = {
-  login:    (email, password)    => request('/login',    { method: 'POST', body: JSON.stringify({ email, password }) }),
-  register: (data)               => request('/register', { method: 'POST', body: JSON.stringify(data) }),
-  logout:   ()                   => request('/logout',   { method: 'POST' }),
-  session:  ()                   => request('/session'),
+  login:          (email, password) => request('/login',           { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register:       (data)            => request('/register',        { method: 'POST', body: JSON.stringify(data) }),
+  logout:         ()                => request('/logout',          { method: 'POST' }),
+  session:        ()                => request('/session'),
+  forgotPassword: (email, newPassword) => request('/forgot-password', { method: 'POST', body: JSON.stringify({ email, newPassword }) }),
 };
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 export const profileApi = {
-  get:    ()       => request('/profile'),
-  update: (data)   => request('/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  get:            ()     => request('/profile'),
+  update:         (data) => request('/profile',          { method: 'PUT', body: JSON.stringify(data) }),
+  changePassword: (data) => request('/profile/password', { method: 'PUT', body: JSON.stringify(data) }),
 };
 
 // ─── Products ────────────────────────────────────────────────────────────────
@@ -105,4 +107,20 @@ export const adminApi = {
   getAllOrders:     ()        => request('/admin/orders'),
   updateStatus:    (orderId, status) =>
     request(`/admin/orders?orderId=${orderId}&status=${status}`, { method: 'PUT' }),
+};
+
+// ─── Wishlist ────────────────────────────────────────────────────────────────
+export const wishlistApi = {
+  getWishlist:        () => request('/wishlist').then(r => r.data),
+  addToWishlist:      (productId) => request('/wishlist', { method: 'POST', body: JSON.stringify({ productId }) }).then(r => r.data),
+  removeFromWishlist: (productId) => request(`/wishlist?productId=${productId}`, { method: 'DELETE' }).then(r => r.data),
+  checkWishlist:      (productId) => request(`/wishlist/check?productId=${productId}`).then(r => r.data),
+};
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+export const notificationApi = {
+  getNotifications: () => request('/notifications').then(r => r.data),
+  getUnreadCount:   () => request('/notifications/unread-count').then(r => r.data),
+  markAsRead:       (id) => request(`/notifications/${id}/read`, { method: 'PUT' }).then(r => r.data),
+  markAllAsRead:    () => request('/notifications/read-all', { method: 'PUT' }).then(r => r.data),
 };

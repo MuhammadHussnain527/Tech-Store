@@ -15,8 +15,12 @@ public class Product {
     private String imageUrl;
     private String specs;
     private boolean active;
-    private LocalDateTime createdAt;
+    private java.time.LocalDateTime createdAt;
     private double averageRating;
+    
+    // New fields
+    private int discountPercentage;
+    private int viewCount;
 
     public Product() {
     }
@@ -127,11 +131,11 @@ public class Product {
         this.active = active;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public java.time.LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -141,5 +145,21 @@ public class Product {
 
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
+    }
+
+    public int getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public void setDiscountPercentage(int discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
     }
 }

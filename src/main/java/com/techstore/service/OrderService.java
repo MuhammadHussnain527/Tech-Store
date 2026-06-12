@@ -8,6 +8,8 @@ import com.techstore.model.CartItem;
 import com.techstore.model.Order;
 import com.techstore.model.OrderItem;
 import com.techstore.model.Product;
+import com.techstore.repository.OrderTrackingRepository;
+import com.techstore.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import javax.sql.DataSource;
@@ -34,6 +36,10 @@ public class OrderService {
     private CartRepository CartRepository;
     @Autowired
     private ProductRepository ProductRepository;
+    @Autowired
+    private OrderTrackingRepository orderTrackingRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
     @Autowired
     private DataSource dataSource;
 
@@ -157,6 +163,12 @@ public class OrderService {
                     // Phase 5: Clear the cart
                     CartRepository.clearCart(connection, order.getUserId());
 
+                    // Add tracking event
+                    orderTrackingRepository.addTrackingEvent(connection, orderId, "PENDING", "Order placed successfully");
+                    
+                    // Add notification
+                    notificationRepository.addNotification(connection, order.getUserId(), "Your order #" + orderId + " has been placed successfully.", "ORDER");
+
                     // All operations succeeded — commit
                     connection.commit();
 
@@ -263,6 +275,12 @@ public class OrderService {
                     throw new ServiceException("Order not found");
                 }
 
+                // Add tracking event
+                orderTrackingRepository.addTrackingEvent(connection, orderId, normalizedStatus, "Order status updated to " + normalizedStatus);
+                
+                // Add notification
+                notificationRepository.addNotification(connection, order.getUserId(), "Your order #" + orderId + " is now " + normalizedStatus + ".", "ORDER");
+
                 connection.commit();
             } catch (ServiceException e) {
                 connection.rollback();
@@ -281,6 +299,22 @@ public class OrderService {
             return OrderRepository.countAllOrders();
         } catch (SQLException e) {
             throw new ServiceException("Unable to count orders", e);
+        }
+    }
+
+    public double getTotalRevenue() throws ServiceException {
+        try {
+            return OrderRepository.getTotalRevenue();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to calculate revenue", e);
+        }
+    }
+
+    public List<Order> getRecentOrders(int limit) throws ServiceException {
+        try {
+            return OrderRepository.getRecentOrders(limit);
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to load recent orders", e);
         }
     }
 }

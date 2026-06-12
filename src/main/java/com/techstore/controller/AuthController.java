@@ -1,5 +1,6 @@
 package com.techstore.controller;
 
+import com.techstore.dto.ForgotPasswordRequest;
 import com.techstore.dto.LoginRequest;
 import com.techstore.dto.RegisterRequest;
 import com.techstore.dto.UserResponse;
@@ -84,6 +85,23 @@ public class AuthController {
             return ResponseUtil.success("Session active", UserResponse.from(user), HttpStatus.OK);
         } catch (ServiceException e) {
             return ResponseUtil.error(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * Forgot-password endpoint: accepts email + new password and resets directly.
+     * NOTE: In production, replace with an email-based OTP/token flow.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+        try {
+            userService.resetPassword(request.getEmail(), request.getNewPassword());
+            return ResponseUtil.success("Password reset successfully", null, HttpStatus.OK);
+        } catch (ServiceException e) {
+            return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseUtil.error("Password reset failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

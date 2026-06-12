@@ -37,6 +37,15 @@ public class UserRepository {
 
     private static final String COUNT_ALL_SQL = "SELECT COUNT(*) AS total FROM users";
 
+    private static final String UPDATE_PASSWORD_BY_EMAIL_SQL =
+            "UPDATE users SET password_hash = ? WHERE email = ?";
+
+    private static final String UPDATE_PASSWORD_BY_ID_SQL =
+            "UPDATE users SET password_hash = ? WHERE user_id = ?";
+
+    private static final String CHECK_EMAIL_EXISTS_SQL =
+            "SELECT COUNT(*) AS cnt FROM users WHERE email = ?";
+
     public User findById(int userId) throws SQLException {
 
         try (
@@ -157,6 +166,37 @@ public class UserRepository {
         }
 
         return 0;
+    }
+
+    public boolean updatePasswordByEmail(String email, String newHash) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD_BY_EMAIL_SQL)) {
+            statement.setString(1, newHash);
+            statement.setString(2, email);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updatePasswordById(int userId, String newHash) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD_BY_ID_SQL)) {
+            statement.setString(1, newHash);
+            statement.setInt(2, userId);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean emailExists(String email) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(CHECK_EMAIL_EXISTS_SQL)) {
+            statement.setString(1, email);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() && rs.getInt("cnt") > 0;
+            }
+        }
     }
 
     private User mapRow(ResultSet resultSet) throws SQLException {

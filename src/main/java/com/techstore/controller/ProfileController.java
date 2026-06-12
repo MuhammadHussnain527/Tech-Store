@@ -1,5 +1,6 @@
 package com.techstore.controller;
 
+import com.techstore.dto.ChangePasswordRequest;
 import com.techstore.dto.ProfileUpdateRequest;
 import com.techstore.dto.UserResponse;
 import com.techstore.model.User;
@@ -58,6 +59,24 @@ public class ProfileController {
             }
 
             return ResponseUtil.success("Profile updated", UserResponse.from(user), HttpStatus.OK);
+        } catch (ServiceException e) {
+            return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @RequestBody ChangePasswordRequest body,
+            HttpServletRequest request) {
+
+        Integer userId = SessionUtil.getUserId(request);
+        if (userId == null) {
+            return ResponseUtil.error("Authentication required", HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            userService.changePassword(userId, body.getOldPassword(), body.getNewPassword());
+            return ResponseUtil.success("Password changed successfully", null, HttpStatus.OK);
         } catch (ServiceException e) {
             return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

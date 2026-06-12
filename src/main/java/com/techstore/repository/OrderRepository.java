@@ -41,6 +41,15 @@ public class OrderRepository {
 
     private static final String COUNT_ALL_SQL = "SELECT COUNT(*) AS total FROM orders";
 
+    private static final String GET_TOTAL_REVENUE_SQL =
+            "SELECT COALESCE(SUM(total_price), 0) AS revenue FROM orders WHERE status = 'DELIVERED'";
+
+    private static final String GET_RECENT_ORDERS_SQL =
+            "SELECT * FROM orders ORDER BY order_date DESC LIMIT ?";
+
+    private static final String GET_REVENUE_BY_STATUS_SQL =
+            "SELECT status, COUNT(*) as cnt, COALESCE(SUM(total_price),0) as total FROM orders GROUP BY status";
+
     // ----------------------------------------------------------------
     // Transactional overload — called inside OrderService transaction
     // ----------------------------------------------------------------
@@ -186,6 +195,33 @@ public class OrderRepository {
         }
 
         return 0;
+    }
+
+    public double getTotalRevenue() throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(GET_TOTAL_REVENUE_SQL);
+                ResultSet resultSet = statement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getDouble("revenue");
+            }
+        }
+        return 0.0;
+    }
+
+    public List<Order> getRecentOrders(int limit) throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(GET_RECENT_ORDERS_SQL)) {
+            statement.setInt(1, limit);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    orders.add(mapRow(resultSet));
+                }
+            }
+        }
+        return orders;
     }
 
     private Order mapRow(ResultSet resultSet)

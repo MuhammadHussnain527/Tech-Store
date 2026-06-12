@@ -44,9 +44,12 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getDashboard() {
         try {
             Map<String, Object> dashboard = new LinkedHashMap<>();
-            dashboard.put("totalUsers", userService.countAllUsers());
+            dashboard.put("totalUsers",    userService.countAllUsers());
             dashboard.put("totalProducts", productService.countAllProducts());
-            dashboard.put("totalOrders", orderService.countAllOrders());
+            dashboard.put("totalOrders",   orderService.countAllOrders());
+            dashboard.put("totalRevenue",  orderService.getTotalRevenue());
+            dashboard.put("recentOrders",  orderService.getRecentOrders(5));
+            dashboard.put("lowStockProducts", productService.getLowStockProducts(10));
             return ResponseUtil.success("Dashboard data loaded", dashboard, HttpStatus.OK);
         } catch (ServiceException e) {
             return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);

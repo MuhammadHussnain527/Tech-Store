@@ -57,20 +57,13 @@ public class ProductRepository {
             ")";
 
     private static final String INSERT_SQL = "INSERT INTO products " +
-            "(category_id, name, description, brand, price, stock_qty, image_url, specs, is_active) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(category_id, name, description, brand, price, stock_qty, image_url, specs, is_active, discount_percentage, view_count) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_SQL = "UPDATE products SET " +
-            "category_id=?, " +
-            "name=?, " +
-            "description=?, " +
-            "brand=?, " +
-            "price=?, " +
-            "stock_qty=?, " +
-            "image_url=?, " +
-            "specs=?, " +
-            "is_active=? " +
-            "WHERE product_id=?";
+            "category_id = ?, name = ?, description = ?, brand = ?, price = ?, " +
+            "stock_qty = ?, image_url = ?, specs = ?, is_active = ?, discount_percentage = ?, view_count = ? " +
+            "WHERE product_id = ?";
 
     // Atomic stock deduction: only succeeds if sufficient stock exists at the DB level
     private static final String DEDUCT_STOCK_SQL = "UPDATE products " +
@@ -87,6 +80,11 @@ public class ProductRepository {
 
     private static final String COUNT_ALL_SQL = "SELECT COUNT(*) AS total FROM products " +
             "WHERE is_active = 1";
+
+    private static final String GET_LOW_STOCK_SQL = "SELECT p.*" + AVG_RATING_SUBQUERY +
+            "FROM products p " +
+            "WHERE p.is_active = 1 AND p.stock_qty <= ? " +
+            "ORDER BY p.stock_qty ASC";
 
     // ----------------------------------------------------------------
     // Public queries — use their own connection
@@ -281,7 +279,7 @@ public class ProductRepository {
             fillProductStatement(statement, product);
 
             statement.setInt(
-                    10,
+                    12,
                     product.getProductId());
 
             return statement.executeUpdate() > 0;
@@ -316,6 +314,21 @@ public class ProductRepository {
         return 0;
     }
 
+    public List<Product> getLowStockProducts(int threshold) throws SQLException {
+        List<Product> products = new ArrayList<>();
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(GET_LOW_STOCK_SQL)) {
+            statement.setInt(1, threshold);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    products.add(mapRow(resultSet));
+                }
+            }
+        }
+        return products;
+    }
+
     private void fillProductStatement(
             PreparedStatement statement,
             Product product)
@@ -330,6 +343,8 @@ public class ProductRepository {
         statement.setString(7, product.getImageUrl());
         statement.setString(8, product.getSpecs());
         statement.setBoolean(9, product.isActive());
+        statement.setInt(10, product.getDiscountPercentage());
+        statement.setInt(11, product.getViewCount());
     }
 
     private Product mapRow(ResultSet resultSet)
@@ -358,6 +373,13 @@ public class ProductRepository {
             product.setAverageRating(resultSet.getDouble("avg_rating"));
         } catch (SQLException ignored) {
             product.setAverageRating(0);
+        }
+
+        try {
+            product.setDiscountPercentage(resultSet.getInt("discount_percentage"));
+            product.setViewCount(resultSet.getInt("view_count"));
+        } catch (SQLException ignored) {
+            // New columns might not exist if migrations aren't fully applied
         }
 
         return product;

@@ -293,6 +293,5 @@ The frontend page will boot locally at `http://localhost:5173`.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License.
+Author
+Muhammad Hussnain

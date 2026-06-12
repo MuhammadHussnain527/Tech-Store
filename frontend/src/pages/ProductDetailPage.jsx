@@ -78,9 +78,9 @@ export default function ProductDetailPage() {
   const inStock = product.stockQty > 0;
   const imgSrc = resolveImageUrl(product.imageUrl);
   const hasDiscount = product.discountPercentage > 0;
-  const originalPrice = hasDiscount 
-    ? (product.price / (1 - product.discountPercentage / 100)).toFixed(2)
-    : null;
+  const currentPrice = hasDiscount 
+    ? (product.price * (1 - product.discountPercentage / 100)).toFixed(2)
+    : Number(product.price).toFixed(2);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in-up">
@@ -145,11 +145,11 @@ export default function ProductDetailPage() {
             <div className="flex flex-col">
               {hasDiscount && (
                 <span className="text-midnight-400 dark:text-slate-500 line-through font-semibold text-lg">
-                  ${originalPrice}
+                  ${Number(product.price).toFixed(2)}
                 </span>
               )}
               <span className="text-5xl font-serif font-bold text-midnight-900 dark:text-white leading-none">
-                ${Number(product.price).toFixed(2)}
+                ${currentPrice}
               </span>
             </div>
           </div>

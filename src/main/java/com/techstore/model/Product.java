@@ -162,4 +162,13 @@ public class Product {
     public void setViewCount(int viewCount) {
         this.viewCount = viewCount;
     }
+
+    public BigDecimal getDiscountedPrice() {
+        if (discountPercentage <= 0) {
+            return price;
+        }
+        BigDecimal discountFactor = BigDecimal.valueOf(100 - discountPercentage)
+                .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        return price.multiply(discountFactor);
+    }
 }

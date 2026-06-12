@@ -24,9 +24,9 @@ export default function ProductCard({ product }) {
   };
 
   const hasDiscount = product.discountPercentage > 0;
-  const originalPrice = hasDiscount 
-    ? (product.price / (1 - product.discountPercentage / 100)).toFixed(2)
-    : null;
+  const currentPrice = hasDiscount 
+    ? (product.price * (1 - product.discountPercentage / 100)).toFixed(2)
+    : Number(product.price).toFixed(2);
 
   return (
     <Link
@@ -83,11 +83,11 @@ export default function ProductCard({ product }) {
           <div className="flex flex-col">
             {hasDiscount && (
               <span className="text-xs text-slate-400 line-through font-semibold mb-0.5">
-                ${originalPrice}
+                ${Number(product.price).toFixed(2)}
               </span>
             )}
             <span className="text-xl font-serif font-bold text-midnight-900 dark:text-white leading-none">
-              ${Number(product.price).toFixed(2)}
+              ${currentPrice}
             </span>
           </div>
           <button

@@ -116,7 +116,7 @@ public class OrderService {
                                     "Requested: " + cartItem.getQuantity());
                         }
 
-                        BigDecimal itemTotal = product.getPrice()
+                        BigDecimal itemTotal = product.getDiscountedPrice()
                                 .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 
                         totalPrice = totalPrice.add(itemTotal);
@@ -125,7 +125,7 @@ public class OrderService {
                         orderItem.setProductId(product.getProductId());
                         orderItem.setProductName(product.getName());
                         orderItem.setQuantity(cartItem.getQuantity());
-                        orderItem.setUnitPrice(product.getPrice()); // snapshot price at time of order
+                        orderItem.setUnitPrice(product.getDiscountedPrice()); // snapshot price at time of order
                         orderItem.setSubtotal(itemTotal);
 
                         orderItems.add(orderItem);

@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Repository
 public class CartRepository {
@@ -27,7 +28,7 @@ public class CartRepository {
 
     private static final String GET_ENRICHED_CART_ITEMS_SQL =
             "SELECT ci.cart_item_id, ci.user_id, ci.product_id, ci.quantity, ci.added_at, " +
-            "p.name AS product_name, p.price, p.image_url, p.stock_qty " +
+            "p.name AS product_name, p.price, p.image_url, p.stock_qty, p.discount_percentage " +
             "FROM cart_items ci " +
             "JOIN products p ON ci.product_id = p.product_id " +
             "WHERE ci.user_id = ? " +
@@ -226,7 +227,17 @@ public class CartRepository {
         item.setProductId(resultSet.getInt("product_id"));
         item.setQuantity(resultSet.getInt("quantity"));
         item.setProductName(resultSet.getString("product_name"));
-        item.setPrice(resultSet.getBigDecimal("price"));
+        
+        BigDecimal originalPrice = resultSet.getBigDecimal("price");
+        int discountPercentage = resultSet.getInt("discount_percentage");
+        if (discountPercentage > 0) {
+            java.math.BigDecimal discountFactor = java.math.BigDecimal.valueOf(100 - discountPercentage)
+                    .divide(java.math.BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            item.setPrice(originalPrice.multiply(discountFactor));
+        } else {
+            item.setPrice(originalPrice);
+        }
+        
         item.setImageUrl(resultSet.getString("image_url"));
         item.setStockQty(resultSet.getInt("stock_qty"));
 

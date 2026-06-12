@@ -228,7 +228,7 @@ public class CartRepository {
         item.setQuantity(resultSet.getInt("quantity"));
         item.setProductName(resultSet.getString("product_name"));
         
-        BigDecimal originalPrice = resultSet.getBigDecimal("price");
+        java.math.BigDecimal originalPrice = resultSet.getBigDecimal("price");
         int discountPercentage = resultSet.getInt("discount_percentage");
         if (discountPercentage > 0) {
             java.math.BigDecimal discountFactor = java.math.BigDecimal.valueOf(100 - discountPercentage)

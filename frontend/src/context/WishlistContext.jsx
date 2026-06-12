@@ -29,7 +29,13 @@ export const WishlistProvider = ({ children }) => {
         try {
             setIsLoading(true);
             const data = await wishlistApi.getWishlist();
-            setWishlist(data || []);
+            const normalized = (data || []).map(item => ({
+                ...item,
+                name: item.productName || item.name,
+                price: item.productPrice || item.price,
+                imageUrl: item.productImageUrl || item.imageUrl
+            }));
+            setWishlist(normalized);
         } catch (error) {
             console.error('Failed to fetch wishlist', error);
         } finally {

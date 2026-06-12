@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Cpu } from 'lucide-react';
+import { Mail, LockIcon, Eye, EyeOff, Cpu } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm]       = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(user?.role === 'ADMIN' ? '/admin-panel' : '/');
+    }
+  }, [isLoggedIn, navigate, user]);
 
   const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -17,8 +23,8 @@ export default function LoginPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const user = await login(form.email, form.password);
-      navigate(user?.role === 'ADMIN' ? '/admin' : '/');
+      const loggedUser = await login(form.email, form.password);
+      navigate(loggedUser?.role === 'ADMIN' ? '/admin-panel' : '/');
     } catch (err) {
       setError(err.message);
     } finally { setLoading(false); }
@@ -61,7 +67,7 @@ export default function LoginPage() {
                 </Link>
               </div>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <LockIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input name="password" type={showPwd ? 'text' : 'password'} required
                   value={form.password} onChange={handle} placeholder="••••••••" className="input pl-9 pr-10" />
                 <button type="button" onClick={() => setShowPwd(s => !s)}

@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Eye, EyeOff, Cpu } from 'lucide-react';
+import { User, Mail, LockIcon, Eye, EyeOff, Cpu } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm]       = useState({ name: '', email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(user?.role === 'ADMIN' ? '/admin-panel' : '/');
+    }
+  }, [isLoggedIn, navigate, user]);
 
   const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -63,7 +69,7 @@ export default function RegisterPage() {
             <div>
               <label className="block text-xs text-slate-400 mb-1.5 font-medium">Password</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <LockIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input name="password" type={showPwd ? 'text' : 'password'} required
                   value={form.password} onChange={handle} placeholder="Min 8 chars, upper + digit" className="input pl-9 pr-10" />
                 <button type="button" onClick={() => setShowPwd(s => !s)}

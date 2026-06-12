@@ -66,7 +66,7 @@ export default function HomePage() {
           <div className="relative w-full h-[500px] lg:h-[700px] flex justify-center items-center z-10">
             <div className="absolute inset-0 bg-gradient-to-tr from-gold-500/20 to-transparent rounded-[40px] transform rotate-3 scale-105 backdrop-blur-3xl"></div>
             <img 
-              src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop" 
+              src="/banner.png" 
               alt="Premium Workspace" 
               className="relative w-full h-full object-cover rounded-[40px] shadow-2xl shadow-midnight-900/50 dark:shadow-black/80"
             />

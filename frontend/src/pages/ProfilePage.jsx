@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
   User, Phone, MapPin, Save, ChevronDown, ChevronUp,
-  Lock, Eye, EyeOff, Shield, CheckCircle2, Heart, Bell, ShoppingBag, X
+  LockIcon, Eye, EyeOff, Shield, CheckCircle2, Heart, Bell, ShoppingBag, X
 } from 'lucide-react';
 import { orderApi, profileApi, resolveImageUrl } from '../services/api';
 import useAuth from '../hooks/useAuth';
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-xs text-slate-500 mb-1 font-semibold uppercase tracking-widest">Current Password</label>
                     <div className="relative">
-                      <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <LockIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input id="profile-old-pwd" name="oldPassword" type={showOld ? 'text' : 'password'}
                         value={pwdForm.oldPassword} onChange={handlePwd}
                         placeholder="Your current password" required
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-xs text-slate-500 mb-1 font-semibold uppercase tracking-widest">New Password</label>
                     <div className="relative">
-                      <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <LockIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input id="profile-new-pwd" name="newPassword" type={showNew ? 'text' : 'password'}
                         value={pwdForm.newPassword} onChange={handlePwd}
                         placeholder="Min. 8 characters" required
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-xs text-slate-500 mb-1 font-semibold uppercase tracking-widest">Confirm New Password</label>
                     <div className="relative">
-                      <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <LockIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input id="profile-confirm-pwd" name="confirmPassword" type="password"
                         value={pwdForm.confirmPassword} onChange={handlePwd}
                         placeholder="Repeat new password" required
@@ -432,7 +432,7 @@ export default function ProfilePage() {
               )}
             </div>
             
-            {notifications.length === 0 ? (
+            {!notifications || notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-midnight-400 dark:text-slate-500">
                 <Bell size={64} className="mb-4 opacity-20" />
                 <p className="font-serif text-2xl text-midnight-900 dark:text-white mb-2">No notifications</p>

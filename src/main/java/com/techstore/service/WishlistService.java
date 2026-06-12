@@ -34,7 +34,15 @@ public class WishlistService {
         try {
             return wishlistRepository.getUserWishlist(userId);
         } catch (SQLException e) {
-            throw new ServiceException("Failed to fetch wishlist", e);
+            throw new ServiceException("Failed to load wishlist", e);
+        }
+    }
+
+    public List<com.techstore.dto.WishlistAdminResponse> getAllWishlistsAdmin() throws ServiceException {
+        try {
+            return wishlistRepository.getAllWishlistsAdmin();
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to load all wishlists", e);
         }
     }
     

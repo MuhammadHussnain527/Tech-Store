@@ -188,6 +188,30 @@ public class ProductService {
         }
     }
 
+    public void updateDiscount(Integer productId, int discountPercentage) throws ServiceException {
+        if (discountPercentage < 0 || discountPercentage > 100) {
+            throw new ServiceException("Discount percentage must be between 0 and 100");
+        }
+        try {
+            boolean updated;
+            if (productId == null) {
+                updated = ProductRepository.updateGlobalDiscount(discountPercentage);
+            } else {
+                Product existing = ProductRepository.getProductById(productId);
+                if (existing == null) {
+                    throw new ServiceException("Product not found");
+                }
+                updated = ProductRepository.updateProductDiscount(productId, discountPercentage);
+            }
+            
+            if (!updated && productId != null) {
+                throw new ServiceException("Unable to update discount for the product");
+            }
+        } catch (SQLException e) {
+            throw new ServiceException("Unable to update discount", e);
+        }
+    }
+
     private void validateProduct(Product product) throws ServiceException {
 
         if (product == null) {

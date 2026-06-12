@@ -27,6 +27,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import AdminCategories from './pages/AdminCategories';
+import AdminWishlists from './pages/AdminWishlists';
 
 function AdminPage({ children }) {
   return (
@@ -47,10 +48,11 @@ export default function App() {
                 <Router>
                   <Routes>
                     {/* ── Admin routes (own layout, no Navbar/Footer) ── */}
-                    <Route path="/admin" element={<AdminPage><AdminDashboard /></AdminPage>} />
-                    <Route path="/admin/products"   element={<AdminPage><AdminProducts /></AdminPage>} />
-                    <Route path="/admin/orders"     element={<AdminPage><AdminOrders /></AdminPage>} />
-                    <Route path="/admin/categories" element={<AdminPage><AdminCategories /></AdminPage>} />
+                    <Route path="/admin-panel" element={<AdminPage><AdminDashboard /></AdminPage>} />
+                    <Route path="/admin-panel/products"   element={<AdminPage><AdminProducts /></AdminPage>} />
+                    <Route path="/admin-panel/orders"     element={<AdminPage><AdminOrders /></AdminPage>} />
+                    <Route path="/admin-panel/categories" element={<AdminPage><AdminCategories /></AdminPage>} />
+                    <Route path="/admin-panel/wishlists"  element={<AdminPage><AdminWishlists /></AdminPage>} />
 
                     {/* ── Public + Customer routes (Navbar + Footer) ── */}
                     <Route path="/*" element={
@@ -71,7 +73,7 @@ export default function App() {
                             <Route path="/checkout" element={
                               <ProtectedRoute><CheckoutPage /></ProtectedRoute>
                             } />
-                            <Route path="/profile" element={
+                            <Route path="/account" element={
                               <ProtectedRoute><ProfilePage /></ProtectedRoute>
                             } />
                             <Route path="/orders" element={

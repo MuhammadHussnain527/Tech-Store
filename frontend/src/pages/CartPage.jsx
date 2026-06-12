@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, ShieldCheck, Truck, Lock } from 'lucide-react';
+import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, ShieldCheck, Truck, LockIcon } from 'lucide-react';
 import { resolveImageUrl } from '../services/api';
 import useCart from '../hooks/useCart';
 

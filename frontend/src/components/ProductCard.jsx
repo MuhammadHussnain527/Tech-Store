@@ -49,10 +49,10 @@ export default function ProductCard({ product }) {
         {/* Badges Overlay */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.stockQty === 0 && (
-            <span className="badge badge-red shadow-lg">Out of Stock</span>
+            <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-lg uppercase tracking-wider">Out of Stock</span>
           )}
           {hasDiscount && (
-            <span className="badge badge-gold shadow-lg">-{product.discountPercentage}% OFF</span>
+            <span className="bg-red-600 text-white text-xs font-black px-3 py-1.5 rounded shadow-lg uppercase tracking-widest">-{product.discountPercentage}% OFF</span>
           )}
         </div>
 

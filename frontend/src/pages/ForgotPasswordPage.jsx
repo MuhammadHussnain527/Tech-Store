@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, LockIcon, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { authApi } from '../services/api';
 
 export default function ForgotPasswordPage() {
@@ -111,7 +111,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5 font-semibold uppercase tracking-widest">New Password</label>
                   <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <LockIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                     <input
                       id="fp-new-password"
                       name="newPassword" type={showPwd ? 'text' : 'password'} required
@@ -142,7 +142,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5 font-semibold uppercase tracking-widest">Confirm Password</label>
                   <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <LockIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                     <input
                       id="fp-confirm-password"
                       name="confirmPassword" type={showConfirm ? 'text' : 'password'} required

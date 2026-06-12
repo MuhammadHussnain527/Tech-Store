@@ -2,19 +2,22 @@ import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingBag, Tag, ChevronLeft, ChevronRight,
-  LogOut, Cpu, Menu, X, TrendingUp
+  LogOut, Cpu, Menu, X, TrendingUp, Heart, Sun, Moon
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 
 const NAV = [
-  { to: '/admin',            label: 'Dashboard',   icon: LayoutDashboard, end: true },
-  { to: '/admin/products',   label: 'Products',    icon: Package },
-  { to: '/admin/orders',     label: 'Orders',      icon: ShoppingBag },
-  { to: '/admin/categories', label: 'Categories',  icon: Tag },
+  { to: '/admin-panel',            label: 'Dashboard',   icon: LayoutDashboard, end: true },
+  { to: '/admin-panel/products',   label: 'Products',    icon: Package },
+  { to: '/admin-panel/orders',     label: 'Orders',      icon: ShoppingBag },
+  { to: '/admin-panel/categories', label: 'Categories',  icon: Tag },
+  { to: '/admin-panel/wishlists',  label: 'Wishlists',   icon: Heart },
 ];
 
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,6 +79,14 @@ export default function AdminLayout({ children }) {
 
       {/* Bottom section */}
       <div className="px-2 pb-4 border-t border-midnight-200 dark:border-white/5 pt-3 space-y-1">
+        <button
+          onClick={toggleTheme}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-100 dark:hover:bg-white/5 transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}
+          title={collapsed ? 'Toggle Theme' : undefined}
+        >
+          {theme === 'dark' ? <Sun size={18} className="flex-shrink-0" /> : <Moon size={18} className="flex-shrink-0" />}
+          {!collapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+        </button>
         <Link
           to="/"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-100 dark:hover:bg-white/5 transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}

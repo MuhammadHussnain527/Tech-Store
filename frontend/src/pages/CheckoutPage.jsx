@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, MapPin, User, Phone, CheckCircle, ArrowRight, ShieldCheck, Truck, ChevronRight } from 'lucide-react';
+import { CreditCard, MapPin, User, Phone, CheckCircle, ArrowRight, ShieldCheck, Truck, ChevronRight, LockIcon } from 'lucide-react';
 import { orderApi } from '../services/api';
 import useCart from '../hooks/useCart';
 import useAuth from '../hooks/useAuth';
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
                   {loading ? 'Processing Securely…' : `Pay $${total.toFixed(2)} & Place Order`}
                 </button>
                 <p className="text-center text-xs text-midnight-400 dark:text-slate-500 mt-4 flex items-center justify-center gap-1">
-                  <Lock size={12} /> Guaranteed safe & secure checkout
+                  <LockIcon size={12} /> Guaranteed safe & secure checkout
                 </p>
               </div>
             </div>

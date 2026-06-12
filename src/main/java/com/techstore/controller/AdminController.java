@@ -9,6 +9,7 @@ import com.techstore.service.OrderService;
 import com.techstore.service.ProductService;
 import com.techstore.service.ServiceException;
 import com.techstore.service.UserService;
+import com.techstore.service.WishlistService;
 import com.techstore.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,9 @@ public class AdminController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -177,6 +181,20 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/products/discount")
+    public ResponseEntity<Map<String, Object>> updateProductDiscount(
+            @RequestParam(required = false) Integer productId,
+            @RequestParam int percentage) {
+        try {
+            productService.updateDiscount(productId, percentage);
+            return ResponseUtil.success("Discount updated successfully", null, HttpStatus.OK);
+        } catch (ServiceException e) {
+            return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseUtil.error("Unable to update discount", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // --- Orders ---
     @GetMapping("/orders")
     public ResponseEntity<Map<String, Object>> getOrders() {
@@ -197,6 +215,17 @@ public class AdminController {
             return ResponseUtil.success("Order status updated", null, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseUtil.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // --- Wishlists ---
+    @GetMapping("/wishlists")
+    public ResponseEntity<Map<String, Object>> getWishlists() {
+        try {
+            List<com.techstore.dto.WishlistAdminResponse> wishlists = wishlistService.getAllWishlistsAdmin();
+            return ResponseUtil.success("Wishlists loaded", wishlists, HttpStatus.OK);
+        } catch (ServiceException e) {
+            return ResponseUtil.error(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

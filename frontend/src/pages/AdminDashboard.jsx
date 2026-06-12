@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       color: 'text-emerald-400',
       bg: 'from-emerald-500/10 to-emerald-600/5',
       border: 'border-emerald-500/20',
-      link: '/admin/products',
+      link: '/admin-panel/products',
     },
     {
       label: 'Total Orders',
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
       color: 'text-amber-400',
       bg: 'from-amber-500/10 to-amber-600/5',
       border: 'border-amber-500/20',
-      link: '/admin/orders',
+      link: '/admin-panel/orders',
     },
     {
       label: 'Revenue (Delivered)',
@@ -164,7 +164,7 @@ export default function AdminDashboard() {
           {loading ? (
             <div className="w-full h-full animate-pulse bg-midnight-100 dark:bg-white/5 rounded-xl"></div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+            <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
               <Clock size={16} className="text-gold-400" />
               <h2 className="text-midnight-900 dark:text-white font-bold text-lg">Recent Orders</h2>
             </div>
-            <Link to="/admin/orders" className="text-xs text-slate-500 dark:text-slate-400 hover:text-gold-400 transition-colors flex items-center gap-1 font-semibold">
+            <Link to="/admin-panel/orders" className="text-xs text-slate-500 dark:text-slate-400 hover:text-gold-400 transition-colors flex items-center gap-1 font-semibold">
               View all <ArrowRight size={12} />
             </Link>
           </div>
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                   {stats.recentOrders.map((order, i) => (
                     <tr
                       key={order.orderId}
-                      className="border-b border-white/3 hover:bg-midnight-50 dark:bg-white/3 transition-colors"
+                      className="border-b border-white/3 hover:bg-midnight-50 dark:hover:bg-white/5 dark:bg-white/3 transition-colors"
                       style={{ animation: `fade-in-up 0.4s ${0.4 + i * 0.08}s ease-out both` }}
                     >
                       <td className="px-4 py-3 text-midnight-900 dark:text-white font-bold">#{order.orderId}</td>
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                 {stats.lowStockProducts.slice(0, 8).map((product, i) => (
                   <div
                     key={product.productId}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-midnight-50 dark:bg-white/3 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-midnight-50 dark:hover:bg-white/5 dark:bg-white/3 transition-colors"
                     style={{ animation: `fade-in-up 0.4s ${0.5 + i * 0.06}s ease-out both` }}
                   >
                     {product.imageUrl
@@ -298,9 +298,9 @@ export default function AdminDashboard() {
         </h2>
         <div className="grid sm:grid-cols-3 gap-4">
           {[
-            { label: 'Manage Products', desc: 'Add, edit, or deactivate products', to: '/admin/products', icon: Package, color: 'text-emerald-400', border: 'hover:border-emerald-500/50' },
-            { label: 'Manage Orders', desc: 'Update order statuses', to: '/admin/orders', icon: ShoppingBag, color: 'text-amber-400', border: 'hover:border-amber-500/50' },
-            { label: 'Manage Categories', desc: 'Add and edit product categories', to: '/admin/categories', icon: Activity, color: 'text-blue-400', border: 'hover:border-blue-500/50' },
+            { label: 'Manage Products', desc: 'Add, edit, or deactivate products', to: '/admin-panel/products', icon: Package, color: 'text-emerald-400', border: 'hover:border-emerald-500/50' },
+            { label: 'Manage Orders', desc: 'Update order statuses', to: '/admin-panel/orders', icon: ShoppingBag, color: 'text-amber-400', border: 'hover:border-amber-500/50' },
+            { label: 'Manage Categories', desc: 'Add and edit product categories', to: '/admin-panel/categories', icon: Activity, color: 'text-blue-400', border: 'hover:border-blue-500/50' },
           ].map(({ label, desc, to, icon: Icon, color, border }) => (
             <Link
               key={to} to={to}

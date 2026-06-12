@@ -88,7 +88,7 @@ export default function Navbar() {
               </div>
             </div>
 
-            {isAdmin && <NavLink to="/admin" className={linkCls}>Admin</NavLink>}
+            {isAdmin && <NavLink to="/admin-panel" className={linkCls}>Admin</NavLink>}
           </nav>
 
           {/* Right side */}
@@ -115,17 +115,18 @@ export default function Navbar() {
               </button>
             </div>
 
-            <button 
-              onClick={toggleTheme} 
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
               className="p-2 rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300"
-              aria-label="Toggle Theme"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             
             {isLoggedIn && (
               <>
-                <Link to="/profile?tab=wishlist" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
+                <Link to="/account?tab=wishlist" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
                   <Heart size={18} />
                   {wishlist?.length > 0 && (
                     <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-midnight-900">
@@ -134,7 +135,7 @@ export default function Navbar() {
                   )}
                 </Link>
                 
-                <Link to="/profile?tab=notifications" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
+                <Link to="/account?tab=notifications" className="p-2 relative rounded-full text-midnight-700 dark:text-slate-300 hover:bg-midnight-100 dark:hover:bg-midnight-800 transition-colors duration-300">
                   <Bell size={18} />
                   {unreadCount > 0 && (
                     <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-midnight-900">
@@ -155,11 +156,11 @@ export default function Navbar() {
                 </button>
                 {/* Dropdown */}
                 <div className="absolute right-0 mt-2 w-48 card-glass p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                  <Link to="/profile" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold tracking-widest uppercase text-midnight-700 dark:text-slate-300 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-50 dark:hover:bg-midnight-800 rounded-xl transition-colors">
+                  <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold tracking-widest uppercase text-midnight-700 dark:text-slate-300 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-50 dark:hover:bg-midnight-800 rounded-xl transition-colors">
                     <User size={16} /> Profile
                   </Link>
                   {isAdmin && (
-                    <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold tracking-widest uppercase text-midnight-700 dark:text-slate-300 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-50 dark:hover:bg-midnight-800 rounded-xl transition-colors">
+                    <Link to="/admin-panel" className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold tracking-widest uppercase text-midnight-700 dark:text-slate-300 hover:text-midnight-900 dark:hover:text-white hover:bg-midnight-50 dark:hover:bg-midnight-800 rounded-xl transition-colors">
                       <LayoutDashboard size={16} /> Dashboard
                     </Link>
                   )}
@@ -193,8 +194,8 @@ export default function Navbar() {
           <nav className="flex flex-col gap-4 pt-4">
             <NavLink to="/"        className={linkCls} end onClick={() => setMobileOpen(false)}>Home</NavLink>
             <NavLink to="/shop"    className={linkCls}     onClick={() => setMobileOpen(false)}>Shop</NavLink>
-            {isAdmin && <NavLink to="/admin" className={linkCls} onClick={() => setMobileOpen(false)}>Admin</NavLink>}
-            {isLoggedIn && <NavLink to="/profile" className={linkCls} onClick={() => setMobileOpen(false)}>Profile</NavLink>}
+            {isAdmin && <NavLink to="/admin-panel" className={linkCls} onClick={() => setMobileOpen(false)}>Admin</NavLink>}
+            {isLoggedIn && <NavLink to="/account" className={linkCls} onClick={() => setMobileOpen(false)}>Profile</NavLink>}
             {isLoggedIn && <NavLink to="/cart"    className={linkCls} onClick={() => setMobileOpen(false)}>Cart</NavLink>}
             {isLoggedIn
               ? <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="text-left text-sm font-bold tracking-widest uppercase text-red-500 py-2">Logout</button>

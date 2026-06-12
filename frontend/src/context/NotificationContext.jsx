@@ -31,8 +31,8 @@ export const NotificationProvider = ({ children }) => {
                 notificationApi.getNotifications(),
                 notificationApi.getUnreadCount()
             ]);
-            setNotifications(notifs);
-            setUnreadCount(count);
+            setNotifications(notifs || []);
+            setUnreadCount(count || 0);
         } catch (error) {
             console.error('Failed to fetch notifications', error);
         }

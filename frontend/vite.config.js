@@ -5,8 +5,8 @@ const backend = 'http://localhost:8080/techstore_db'
 
 const proxyPaths = [
   '/products', '/categories', '/cart', '/orders',
-  '/login', '/register', '/logout', '/session',
-  '/admin', '/profile', '/uploads',
+  '/login', '/register', '/logout', '/session', '/forgot-password',
+  '/admin/', '/profile', '/uploads', '/wishlist', '/notifications'
 ]
 
 const proxy = Object.fromEntries(

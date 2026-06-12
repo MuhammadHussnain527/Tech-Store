@@ -4,7 +4,7 @@ import { adminApi, resolveImageUrl } from '../services/api';
 
 const EMPTY = {
   productId: 0, categoryId: '', name: '', brand: '',
-  price: '', stockQty: '', description: '', specs: '', imageUrl: '', active: true,
+  price: '', stockQty: '', description: '', specs: '', imageUrl: '', active: true, discountPercentage: 0,
 };
 
 const STOCK_STYLE = qty =>
@@ -25,6 +25,8 @@ export default function AdminProducts() {
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
   const [catFilter, setCatFilter] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [globalDiscount, setGlobalDiscount] = useState('');
+  const [discounting, setDiscounting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -38,11 +40,22 @@ export default function AdminProducts() {
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setForm(EMPTY); setError(''); setModal('add'); };
-  const openEdit = prod => { setForm({ ...EMPTY, ...prod, description: prod.description || '', specs: prod.specs || '', brand: prod.brand || '', imageUrl: prod.imageUrl || '' }); setError(''); setModal('edit'); };
+  const openEdit = prod => { setForm({ ...EMPTY, ...prod, description: prod.description || '', specs: prod.specs || '', brand: prod.brand || '', imageUrl: prod.imageUrl || '', discountPercentage: prod.discountPercentage || 0 }); setError(''); setModal('edit'); };
   const close = () => { setModal(null); setError(''); };
   const handle = e => setForm(f => ({
     ...f, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value
   }));
+
+  const applyGlobalDiscount = async () => {
+    if (!globalDiscount) return;
+    setDiscounting(true); setError('');
+    try {
+      await adminApi.updateDiscount(null, Number(globalDiscount));
+      setGlobalDiscount('');
+      load();
+    } catch (err) { setError(err.message); }
+    finally { setDiscounting(false); }
+  };
 
   const handleImageUpload = async e => {
     const file = e.target.files?.[0];
@@ -64,6 +77,7 @@ export default function AdminProducts() {
         price: Number(form.price),
         stockQty: Number(form.stockQty),
         categoryId: Number(form.categoryId),
+        discountPercentage: Number(form.discountPercentage),
       };
       if (modal === 'add') await adminApi.createProduct(payload);
       else await adminApi.updateProduct(payload);
@@ -130,6 +144,23 @@ export default function AdminProducts() {
             onClick={() => setViewMode('grid')}
             className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-gold-500/20 text-gold-400' : 'text-slate-500 dark:text-slate-400 hover:text-midnight-900 dark:text-white hover:bg-midnight-100 dark:bg-white/5'}`}
           ><LayoutGrid size={16} /></button>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <input
+            type="number"
+            value={globalDiscount}
+            onChange={e => setGlobalDiscount(e.target.value)}
+            placeholder="Discount %"
+            min="0" max="100"
+            className="input bg-midnight-100 dark:bg-white/5 border-midnight-200 dark:border-white/10 text-midnight-900 dark:text-white placeholder-slate-600 w-28"
+          />
+          <button
+            onClick={applyGlobalDiscount}
+            disabled={discounting || !globalDiscount}
+            className="btn-secondary whitespace-nowrap"
+          >
+            {discounting ? 'Applying...' : 'Apply Global Discount'}
+          </button>
         </div>
       </div>
 
@@ -202,7 +233,7 @@ export default function AdminProducts() {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.productId} className="border-b border-white/3 hover:bg-midnight-50 dark:bg-white/3 transition-colors">
+                  <tr key={p.productId} className="border-b border-white/3 hover:bg-midnight-50 dark:hover:bg-white/5 dark:bg-white/3 transition-colors">
                     <td className="px-4 py-3">
                       {p.imageUrl
                         ? <img src={resolveImageUrl(p.imageUrl)} alt={p.name}
@@ -310,17 +341,18 @@ export default function AdminProducts() {
                   ))}
                 </div>
 
-                {/* Price + Stock */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Price + Stock + Discount */}
+                <div className="grid grid-cols-3 gap-3">
                   {[
-                    { name: 'price', label: 'Price (PKR) *', type: 'number', step: '0.01' },
-                    { name: 'stockQty', label: 'Stock Qty *', type: 'number', step: '1' },
-                  ].map(({ name, label, type, step }) => (
+                    { name: 'price', label: 'Price (PKR) *', type: 'number', step: '0.01', required: true },
+                    { name: 'stockQty', label: 'Stock Qty *', type: 'number', step: '1', required: true },
+                    { name: 'discountPercentage', label: 'Discount %', type: 'number', step: '1', required: false },
+                  ].map(({ name, label, type, step, required }) => (
                     <div key={name}>
                       <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-semibold uppercase tracking-widest">{label}</label>
                       <input name={name} type={type} value={form[name]} onChange={handle}
-                        placeholder="0" min={0} step={step}
-                        className="input bg-midnight-100 dark:bg-white/5 border-midnight-200 dark:border-white/10 text-midnight-900 dark:text-white placeholder-slate-600" required />
+                        placeholder="0" min={0} max={name === 'discountPercentage' ? 100 : undefined} step={step}
+                        className="input bg-midnight-100 dark:bg-white/5 border-midnight-200 dark:border-white/10 text-midnight-900 dark:text-white placeholder-slate-600" required={required} />
                     </div>
                   ))}
                 </div>

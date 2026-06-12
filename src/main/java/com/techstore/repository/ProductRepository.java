@@ -86,6 +86,10 @@ public class ProductRepository {
             "WHERE p.is_active = 1 AND p.stock_qty <= ? " +
             "ORDER BY p.stock_qty ASC";
 
+    private static final String UPDATE_GLOBAL_DISCOUNT_SQL = "UPDATE products SET discount_percentage = ?";
+    
+    private static final String UPDATE_PRODUCT_DISCOUNT_SQL = "UPDATE products SET discount_percentage = ? WHERE product_id = ?";
+
     // ----------------------------------------------------------------
     // Public queries — use their own connection
     // ----------------------------------------------------------------
@@ -295,6 +299,23 @@ public class ProductRepository {
 
             statement.setInt(1, productId);
 
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateGlobalDiscount(int discountPercentage) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(UPDATE_GLOBAL_DISCOUNT_SQL)) {
+            statement.setInt(1, discountPercentage);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateProductDiscount(int productId, int discountPercentage) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(UPDATE_PRODUCT_DISCOUNT_SQL)) {
+            statement.setInt(1, discountPercentage);
+            statement.setInt(2, productId);
             return statement.executeUpdate() > 0;
         }
     }

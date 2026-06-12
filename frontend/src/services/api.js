@@ -96,6 +96,10 @@ export const adminApi = {
   createProduct:   (data)    => request('/admin/products', { method: 'POST',   body: JSON.stringify(data) }),
   updateProduct:   (data)    => request('/admin/products', { method: 'PUT',    body: JSON.stringify(data) }),
   deleteProduct:   (id)      => request(`/admin/products?id=${id}`, { method: 'DELETE' }),
+  updateDiscount:  (productId, percentage) => {
+    const url = productId ? `/admin/products/discount?productId=${productId}&percentage=${percentage}` : `/admin/products/discount?percentage=${percentage}`;
+    return request(url, { method: 'PUT' });
+  },
 
   // Categories
   getAllCategories: ()        => request('/admin/categories'),
@@ -107,6 +111,9 @@ export const adminApi = {
   getAllOrders:     ()        => request('/admin/orders'),
   updateStatus:    (orderId, status) =>
     request(`/admin/orders?orderId=${orderId}&status=${status}`, { method: 'PUT' }),
+
+  // Wishlists
+  getAllWishlists:  ()        => request('/admin/wishlists'),
 };
 
 // ─── Wishlist ────────────────────────────────────────────────────────────────
